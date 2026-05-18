@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 
-import type { BlogRequest } from "@/lib/seo-schema";
+import type { BlogRequest, ExtractedKeyword } from "@/lib/seo-schema";
 
 type AhrefsPayload = {
   organicKeywords: unknown;
@@ -20,6 +20,105 @@ export type SeoData = {
   ahrefs: AhrefsPayload;
   googleSearchConsole: GscPayload;
 };
+
+function toRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function toNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value.replace(/,/g, ""));
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+}
+
+function findRows(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  const record = toRecord(value);
+  if (!record) {
+    return [];
+  }
+
+  const rowKeys = ["rows", "data", "keywords", "organic_keywords"];
+
+  for (const key of rowKeys) {
+    const rows = findRows(record[key]);
+    if (rows.length > 0) {
+      return rows;
+    }
+  }
+
+  return [];
+}
+
+export function extractSeoKeywords(seoData: SeoData): ExtractedKeyword[] {
+  const keywordMap = new Map<string, ExtractedKeyword>();
+
+  findRows(seoData.ahrefs.organicKeywords).forEach((row) => {
+    const record = toRecord(row);
+
+    if (!record || typeof record.keyword !== "string" || !record.keyword.trim()) {
+      return;
+    }
+
+    const keyword = record.keyword.trim();
+
+    keywordMap.set(keyword.trim().toLowerCase(), {
+      keyword,
+      source: "Ahrefs",
+      volume: toNumber(record.volume),
+      traffic: toNumber(record.sum_traffic),
+      position: toNumber(record.best_position),
+    });
+  });
+
+  seoData.googleSearchConsole.rows.forEach((row) => {
+    const record = toRecord(row);
+    if (!record) {
+      return;
+    }
+
+    const keys = record.keys;
+    const keyword = Array.isArray(keys) ? keys[0] : undefined;
+
+    if (typeof keyword !== "string" || !keyword.trim()) {
+      return;
+    }
+
+    const normalized = keyword.trim().toLowerCase();
+    const existing = keywordMap.get(normalized);
+
+    keywordMap.set(normalized, {
+      ...existing,
+      keyword: existing?.keyword ?? keyword.trim(),
+      source: existing?.source ?? "Search Console",
+      clicks: toNumber(record.clicks),
+      impressions: toNumber(record.impressions),
+      position: toNumber(record.position),
+    });
+  });
+
+  return Array.from(keywordMap.values())
+    .sort((a, b) => {
+      const aScore = a.traffic ?? a.clicks ?? a.impressions ?? a.volume ?? 0;
+      const bScore = b.traffic ?? b.clicks ?? b.impressions ?? b.volume ?? 0;
+      return bScore - aScore;
+    })
+    .slice(0, 20);
+}
 
 function todayMinusDays(days: number) {
   const date = new Date();

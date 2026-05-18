@@ -1,3 +1,4 @@
+
 import OpenAI from "openai";
 
 import {
@@ -158,6 +159,9 @@ EVIDENCE RULES:
 - Any unverified claim = [NEEDS SOURCE].
 
 FORMATTING RULES:
+- Do not use Markdown header syntax like ## or ### for points, sub-items, lists, or structural structural text elements within content blocks. Use standard text lists or numbered steps instead.
+- Do not include emojis or pictograms anywhere in the text or headers.
+- Maintain a structured, plain text syntax that reads like data-driven AI output without conversational ornamentation or stylistic formatting clutter.
 - No paragraph over 5 sentences. Most paragraphs: 1–3 sentences.
 - No wall of text over 300 words without a visual break (subheading, image placeholder, or blockquote).
 - Bold the single most important takeaway per section — one phrase or sentence only, not whole paragraphs.
@@ -277,3 +281,4 @@ export async function generateSeoBlog(
   const parsed = JSON.parse(response.output_text);
   return blogResponseSchema.parse(parsed);
 }
+

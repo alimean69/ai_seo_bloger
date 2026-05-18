@@ -53,5 +53,15 @@ export const blogResponseSchema = z.object({
   selfCheckResults: z.string(),
 });
 
+export type ExtractedKeyword = {
+  keyword: string;
+  source: "Ahrefs" | "Search Console";
+  volume?: number;
+  traffic?: number;
+  position?: number;
+  clicks?: number;
+  impressions?: number;
+};
+
 export type BlogRequest = z.infer<typeof blogRequestSchema>;
 export type BlogResponse = z.infer<typeof blogResponseSchema>;
