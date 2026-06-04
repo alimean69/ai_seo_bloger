@@ -16,8 +16,8 @@ export const blogRequestSchema = z.object({
   mainKeyword: z
     .string()
     .trim()
-    .min(2, "Enter a main keyword.")
-    .max(160, "Keyword is too long."),
+    .min(2, "Enter at least one keyword.")
+    .max(2000, "Keyword list is too long."),
   targetAudience: z
     .string()
     .trim()
@@ -55,8 +55,21 @@ export const blogResponseSchema = z.object({
 
 export type ExtractedKeyword = {
   keyword: string;
-  source: "Ahrefs" | "Search Console" | "Suggested";
+  source:
+    | "Ahrefs"
+    | "Ahrefs Keywords Explorer"
+    | "Search Console"
+    | "Suggested"
+    | "User";
   volume?: number;
+  difficulty?: number;
+  cpc?: number;
+  trafficPotential?: number;
+  intents?: string[];
+  score?: number;
+  reason?: string;
+  selectedIntent?: "informational" | "commercial" | "transactional" | "navigational";
+  priority?: "high" | "medium" | "low";
   traffic?: number;
   position?: number;
   clicks?: number;

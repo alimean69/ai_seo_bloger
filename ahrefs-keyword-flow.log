@@ -1,0 +1,560 @@
+Ahrefs keyword workflow log.
+Each /api/generate-blog frontend request appends a JSON report below.
+Authorization headers are redacted.
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T02:52:55.942Z",
+  "endpoint": "overview",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/overview?country=us&keywords=personal+bag+carry+on+size%2Cbest+place+to+buy+luggage+near+me%2Cbest+luggage+store+near+me%2Cluggage+deals%2Cbest+luggage+size+for+international+travel%2Cluggage+discounts%2Csuitcase+international+travel+size%2Clugage+sets%2Cbest+suitcase+for+men%27s+suits%2Cluggage+in+store%2Cluggage+hitch%2Cmacy+suitcase%2Cinternational+size+luggage%2Cinternational+flight+luggage%2Ctraveling+bags+on+sale%2Cluggage+price%2Cshop+deals+on+suitcases%2Clarge+luggage+on+sale%2Cbiggest+suitcases%2Cbig+suitcases+for+travel%2Chard+case+carry+on%2Cbest+check+in+bags%2Cluggage+locks%2Cluggages+sizes%2Csuitcases+in+sale%2Ctravel+suitcases+on+wheels%2Camerican+traveller+luggage%2Ctracel+bags%2Cluggage+62+inches+total%2Cwhat+is+the+largest+suitcase%2Cluggage+used+by+flight+crews%2Cluggage+tracker+for+android%2Cluggage+lockers+nyc%2Cluggage+storage+near+me%2Cluggage+padlock%2Cluggage+tags+near+me%2Cbest+metal+suitcases%2Cluggage+extra+large%2Cluggage+replacement+wheels%2Cwhat+type+of+luggage+is+best+for+air+travel%2Cluggage+hero+nyc%2Caway+luggage+in+store%2Ccheap+travel+bag%2Ccostco+luggage+delsey%2Cluggage+burlington%2Cluggage+trolley%2Cluggage+drop+off%2Cbest+place+to+buy+affordable+luggage%2Cluggage+belt+strap%2Cluggage+gps+tracker&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Ctraffic_potential%2Cintents%2Cglobal_volume%2Cserp_last_update",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 2650, API units left: 620."
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T02:52:56.012Z",
+  "endpoint": "overview",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/overview?country=us&keywords=away%2Caway+luggage+company%2Csway+luggage%2Cbei+luggage%2Cluggage+suitcase%2Csamsonite+luggages%2Clarge+travel%2Ctravelpro+luggage%2Ctraveling+suitcases%2Clugagge%2Cluggage+beis%2Cbuy+luggage+bags%2Cluggage+for+traveling%2Ctravel+luggages%2Csuitcade%2Cluggage+bag%2Ctravel+pro+suitcase%2Ctravelpeo%2Ctravelpro+top+lite+elite%2Cluggage+bags+for+travelling%2Cluxury+suitcases%2Cwhat%27s+the+best+luggage+sets+to+buy%2Cbest+large+rolling+luggage%2Cbest+organized+luggage%2Caway+travel+case%2Cbest+wheel+luggage%2Cbest+brand+luggage+set%2Cluggage+jetblue%2Csway+suitcase%2Cbest+kuggage%2Cluggage+makers%2Cbest+suitcase+company%2Cbest+mens+luggage+brands%2Cwhats+the+best+luggage+brand%2Chighly+rated+luggage%2Cluggage+top+brands%2Ccarry+on+luggages%2Cgood+suitcase%2Clugless+near+me%2Caway+suite+case%2Cbest+carry+on+case%2Cbest+luggage+for+overseas+travel%2Camerican+tourister+luggage+size+chart%2Camerican+tourister+zipperless+luggage%2Ccostco+luggages%2Cluggage+deals+costco%2Cdoes+costco+have+luggage+in+store%2Ccostco.luggage%2Ccostco+luggae%2Cdoes+costco+sell+luggage&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Ctraffic_potential%2Cintents%2Cglobal_volume%2Cserp_last_update",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 2650, API units left: 620."
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T03:03:19.464Z",
+  "endpoint": "matching-terms",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/matching-terms?keywords=luggages&country=us&limit=100&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 4200, API units left: 620."
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T03:03:19.477Z",
+  "endpoint": "related-terms",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/related-terms?keywords=luggages&country=us&limit=100&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 4200, API units left: 620."
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T03:03:19.485Z",
+  "endpoint": "search-suggestions",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/search-suggestions?keywords=luggages&country=us&limit=100&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 4200, API units left: 620."
+}
+
+{
+  "event": "ahrefs_keyword_workflow",
+  "timestamp": "2026-05-20T03:11:13.442Z",
+  "seedKeyword": "luggages",
+  "country": "us",
+  "configuredLimits": {
+    "discoveryLimitPerEndpoint": 4,
+    "overviewKeywordLimit": 0
+  },
+  "scoreFormula": "score = (traffic_potential * 0.5) + (volume * 0.3) + (cpc * 0.2) - (difficulty * 2)",
+  "step1MatchingTerms": {
+    "description": "Returns keywords that directly match or closely contain the seed keyword.",
+    "apiCall": {
+      "endpoint": "matching-terms",
+      "method": "GET",
+      "url": "https://api.ahrefs.com/v3/keywords-explorer/matching-terms?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+      "curl": "curl -X GET \"https://api.ahrefs.com/v3/keywords-explorer/matching-terms?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential\" -H \"Authorization: Bearer [REDACTED]\" -H \"Accept: application/json\"",
+      "status": 200,
+      "rowCount": 4,
+      "resultRows": [
+        {
+          "keyword": "luggages in infiniti trunk",
+          "volume": 0,
+          "cpc": 0
+        },
+        {
+          "keyword": "cheap carry on luggages bags 25 inches",
+          "volume": 0,
+          "cpc": 0
+        },
+        {
+          "keyword": "how to order luggages tags on azamara website",
+          "volume": 0,
+          "cpc": 0
+        },
+        {
+          "keyword": "can i check my cpap in my luggages when flying",
+          "volume": 0,
+          "cpc": 0
+        }
+      ]
+    }
+  },
+  "step2RelatedTerms": {
+    "description": "Returns semantically related topic-level keyword expansions.",
+    "apiCall": {
+      "endpoint": "related-terms",
+      "method": "GET",
+      "url": "https://api.ahrefs.com/v3/keywords-explorer/related-terms?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+      "curl": "curl -X GET \"https://api.ahrefs.com/v3/keywords-explorer/related-terms?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential\" -H \"Authorization: Bearer [REDACTED]\" -H \"Accept: application/json\"",
+      "status": 200,
+      "rowCount": 4,
+      "resultRows": [
+        {
+          "keyword": "travel plus luggage",
+          "volume": 30,
+          "difficulty": 6,
+          "cpc": 80,
+          "trafficPotential": 10
+        },
+        {
+          "keyword": "costco luggage delsey",
+          "volume": 10,
+          "difficulty": 0,
+          "cpc": 30,
+          "trafficPotential": 1700
+        },
+        {
+          "keyword": "away luggage in store",
+          "volume": 40,
+          "difficulty": 20,
+          "trafficPotential": 2000
+        },
+        {
+          "keyword": "luggage for traveling",
+          "volume": 150,
+          "difficulty": 39,
+          "trafficPotential": 52000
+        }
+      ]
+    }
+  },
+  "step3SearchSuggestions": {
+    "description": "Returns real user search queries from Google autocomplete.",
+    "apiCall": {
+      "endpoint": "search-suggestions",
+      "method": "GET",
+      "url": "https://api.ahrefs.com/v3/keywords-explorer/search-suggestions?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+      "curl": "curl -X GET \"https://api.ahrefs.com/v3/keywords-explorer/search-suggestions?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential\" -H \"Authorization: Bearer [REDACTED]\" -H \"Accept: application/json\"",
+      "status": 200,
+      "rowCount": 4,
+      "resultRows": [
+        {
+          "keyword": "luggage handle covers",
+          "volume": 100,
+          "difficulty": 0,
+          "trafficPotential": 100
+        },
+        {
+          "keyword": "o bag price",
+          "volume": 10,
+          "cpc": 35
+        },
+        {
+          "keyword": "luggage bag",
+          "volume": 4600,
+          "difficulty": 38,
+          "cpc": 35,
+          "trafficPotential": 47000
+        },
+        {
+          "keyword": "luggage nuts",
+          "volume": 10
+        }
+      ]
+    }
+  },
+  "step4MergeKeywordPool": {
+    "description": "Combines matching terms, related terms, and search suggestions, then lowercases, trims, and deduplicates keywords.",
+    "inputRowCounts": {
+      "matchingTerms": 4,
+      "relatedTerms": 4,
+      "searchSuggestions": 4
+    },
+    "uniqueKeywordCount": 12,
+    "masterKeywordPool": [
+      {
+        "keyword": "luggage for traveling",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 150,
+        "difficulty": 39,
+        "trafficPotential": 52000
+      },
+      {
+        "keyword": "luggage bag",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 4600,
+        "difficulty": 38,
+        "cpc": 35,
+        "trafficPotential": 47000
+      },
+      {
+        "keyword": "away luggage in store",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 40,
+        "difficulty": 20,
+        "trafficPotential": 2000
+      },
+      {
+        "keyword": "costco luggage delsey",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 10,
+        "difficulty": 0,
+        "cpc": 30,
+        "trafficPotential": 1700
+      },
+      {
+        "keyword": "luggage handle covers",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 100,
+        "difficulty": 0,
+        "trafficPotential": 100
+      },
+      {
+        "keyword": "travel plus luggage",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 30,
+        "difficulty": 6,
+        "cpc": 80,
+        "trafficPotential": 10
+      },
+      {
+        "keyword": "o bag price",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 10,
+        "cpc": 35
+      },
+      {
+        "keyword": "luggage nuts",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 10
+      },
+      {
+        "keyword": "luggages in infiniti trunk",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0
+      },
+      {
+        "keyword": "cheap carry on luggages bags 25 inches",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0
+      },
+      {
+        "keyword": "how to order luggages tags on azamara website",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0
+      },
+      {
+        "keyword": "can i check my cpap in my luggages when flying",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0
+      }
+    ]
+  },
+  "step5KeywordOverview": {
+    "description": "Fetches deeper SEO metrics for the highest-quality keywords from the merged pool.",
+    "overviewKeywordLimit": 0,
+    "status": "skipped_disabled",
+    "selectedKeywordCount": 0,
+    "selectedKeywords": [],
+    "apiCalls": []
+  },
+  "step6KeywordScoringAndRanking": {
+    "description": "Ranks keywords by traffic potential, volume, CPC, and difficulty.",
+    "top20PerformingKeywords": [
+      {
+        "keyword": "luggage for traveling",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 150,
+        "difficulty": 39,
+        "trafficPotential": 52000,
+        "score": 25967
+      },
+      {
+        "keyword": "luggage bag",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 4600,
+        "difficulty": 38,
+        "cpc": 35,
+        "trafficPotential": 47000,
+        "score": 24811
+      },
+      {
+        "keyword": "away luggage in store",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 40,
+        "difficulty": 20,
+        "trafficPotential": 2000,
+        "score": 972
+      },
+      {
+        "keyword": "costco luggage delsey",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 10,
+        "difficulty": 0,
+        "cpc": 30,
+        "trafficPotential": 1700,
+        "score": 859
+      },
+      {
+        "keyword": "luggage handle covers",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 100,
+        "difficulty": 0,
+        "trafficPotential": 100,
+        "score": 80
+      },
+      {
+        "keyword": "travel plus luggage",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 30,
+        "difficulty": 6,
+        "cpc": 80,
+        "trafficPotential": 10,
+        "score": 18
+      },
+      {
+        "keyword": "o bag price",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 10,
+        "cpc": 35,
+        "score": 10
+      },
+      {
+        "keyword": "luggage nuts",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 10,
+        "score": 3
+      },
+      {
+        "keyword": "luggages in infiniti trunk",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0,
+        "score": 0
+      },
+      {
+        "keyword": "cheap carry on luggages bags 25 inches",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0,
+        "score": 0
+      },
+      {
+        "keyword": "how to order luggages tags on azamara website",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0,
+        "score": 0
+      },
+      {
+        "keyword": "can i check my cpap in my luggages when flying",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0,
+        "score": 0
+      }
+    ],
+    "top10KeywordsSentToBlog": [
+      {
+        "keyword": "luggage for traveling",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 150,
+        "difficulty": 39,
+        "trafficPotential": 52000,
+        "score": 25967
+      },
+      {
+        "keyword": "luggage bag",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 4600,
+        "difficulty": 38,
+        "cpc": 35,
+        "trafficPotential": 47000,
+        "score": 24811
+      },
+      {
+        "keyword": "away luggage in store",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 40,
+        "difficulty": 20,
+        "trafficPotential": 2000,
+        "score": 972
+      },
+      {
+        "keyword": "costco luggage delsey",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 10,
+        "difficulty": 0,
+        "cpc": 30,
+        "trafficPotential": 1700,
+        "score": 859
+      },
+      {
+        "keyword": "luggage handle covers",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 100,
+        "difficulty": 0,
+        "trafficPotential": 100,
+        "score": 80
+      },
+      {
+        "keyword": "travel plus luggage",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "related-terms"
+        ],
+        "volume": 30,
+        "difficulty": 6,
+        "cpc": 80,
+        "trafficPotential": 10,
+        "score": 18
+      },
+      {
+        "keyword": "o bag price",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 10,
+        "cpc": 35,
+        "score": 10
+      },
+      {
+        "keyword": "luggage nuts",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "search-suggestions"
+        ],
+        "volume": 10,
+        "score": 3
+      },
+      {
+        "keyword": "luggages in infiniti trunk",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0,
+        "score": 0
+      },
+      {
+        "keyword": "cheap carry on luggages bags 25 inches",
+        "source": "Ahrefs Keywords Explorer",
+        "sourceEndpoints": [
+          "matching-terms"
+        ],
+        "volume": 0,
+        "cpc": 0,
+        "score": 0
+      }
+    ]
+  }
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T04:23:04.249Z",
+  "endpoint": "search-suggestions",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/search-suggestions?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 168, API units left: 116."
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T04:23:04.321Z",
+  "endpoint": "related-terms",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/related-terms?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 168, API units left: 116."
+}
+
+{
+  "event": "ahrefs_keyword_api_error",
+  "timestamp": "2026-05-20T04:23:04.757Z",
+  "endpoint": "matching-terms",
+  "url": "https://api.ahrefs.com/v3/keywords-explorer/matching-terms?keywords=luggages&country=us&limit=4&select=keyword%2Cvolume%2Cdifficulty%2Ccpc%2Cintents%2Ctraffic_potential",
+  "status": 403,
+  "responseBody": "API units limit reached. Expected usage: 168, API units left: 116."
+}
+

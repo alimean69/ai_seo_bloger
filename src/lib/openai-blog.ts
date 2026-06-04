@@ -62,11 +62,17 @@ function formatExtractedKeywords(keywords: ExtractedKeyword[]) {
   return keywords
     .map((keyword, index) => {
       const metrics = [
-        keyword.volume ? `volume ${keyword.volume}` : "",
-        keyword.traffic ? `traffic ${keyword.traffic}` : "",
-        keyword.clicks ? `clicks ${keyword.clicks}` : "",
-        keyword.impressions ? `impressions ${keyword.impressions}` : "",
-        keyword.position ? `position ${keyword.position.toFixed(1)}` : "",
+        keyword.volume !== undefined ? `volume ${keyword.volume}` : "",
+        keyword.difficulty !== undefined ? `difficulty ${keyword.difficulty}` : "",
+        keyword.cpc !== undefined ? `CPC ${keyword.cpc}` : "",
+        keyword.trafficPotential !== undefined
+          ? `traffic potential ${keyword.trafficPotential}`
+          : "",
+        keyword.intents?.length ? `intents ${keyword.intents.join("/")}` : "",
+        keyword.score !== undefined ? `score ${keyword.score}` : "",
+        keyword.selectedIntent ? `GPT intent ${keyword.selectedIntent}` : "",
+        keyword.priority ? `GPT priority ${keyword.priority}` : "",
+        keyword.reason ? `reason ${keyword.reason}` : "",
       ].filter(Boolean);
 
       return `${index + 1}. ${keyword.keyword} (${keyword.source}${
@@ -84,12 +90,12 @@ function buildBlogPrompt(
   const requiredKeywords = formatExtractedKeywords(extractedKeywords);
 
   const semanticEntities = [
-    "Use Ahrefs top pages, Ahrefs metrics, and Google Search Console query/page data for semantic entities and LSI terms.",
+    "Use the user-provided keyword list for semantic entities and LSI terms.",
     "Flag anything that needs manual confirmation.",
   ].join(" ");
 
   const internalLinks = [
-    "Use Google Search Console page data and Ahrefs top pages as internal linking opportunities.",
+    "Use the website and brand context to infer internal linking opportunities.",
     "If no relevant URLs are available, use descriptive [INTERNAL LINK: page description] placeholders.",
   ].join(" ");
 
@@ -100,14 +106,14 @@ function buildBlogPrompt(
 
 You will be given:
 - PRIMARY KEYWORD: ${input.mainKeyword}
-- REQUIRED KEYWORDS TO USE IN THE FINAL BLOG CONTENT:
+- REQUIRED KEYWORDS TO USE IN THE FINAL BLOG CONTENT (user-provided keywords):
 ${requiredKeywords}
 - SEMANTIC ENTITIES / LSI TERMS: ${semanticEntities}
 - SEARCH INTENT: informational / commercial / navigational / transactional
 - TARGET AUDIENCE: ${input.targetAudience}
 - TARGET WORD COUNT: ${input.blogLength}
 - BRAND/SITE CONTEXT: ${input.productServiceName} — travel/lifestyle brand context for ${input.websiteDomain}
-- COMPETITOR GAPS TO EXPLOIT: ${input.extraNotes || "Use SEO data to identify likely competitor gaps; flag uncertain claims as [NEEDS SOURCE]."}
+- COMPETITOR GAPS TO EXPLOIT: ${input.extraNotes || "Use the provided keyword set, brand context, and likely search intent to identify content gaps; flag uncertain claims as [NEEDS SOURCE]."}
 - INTERNAL LINKING OPPORTUNITIES: ${internalLinks}
 - PEOPLE ALSO ASK QUESTIONS TO ANSWER: ${paaQuestions}
 
@@ -193,7 +199,7 @@ FORMATTING RULES:
 
 KEYWORD RULES:
 - Use every REQUIRED KEYWORD in the Complete Blog Post field at least once.
-- Use 10 to 12 REQUIRED KEYWORDS naturally in headings, intro, body, FAQ, or closing.
+- Use all REQUIRED KEYWORDS naturally in headings, intro, body, FAQ, or closing.
 - Do not stuff keywords. If a keyword is awkward, use it once in a natural sentence.
 - Keep exact spelling from the REQUIRED KEYWORDS list, even if it contains a typo from the user input.
 - Do not invent a different keyword list.

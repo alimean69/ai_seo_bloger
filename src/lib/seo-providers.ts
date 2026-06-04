@@ -1,14 +1,39 @@
 import { google } from "googleapis";
 import fs from "node:fs";
+import path from "node:path";
 
 import type { BlogRequest, ExtractedKeyword } from "@/lib/seo-schema";
 
 type AhrefsPayload = {
-  organicKeywords: unknown;
-  topPages: unknown;
-  metrics: unknown;
-  referringDomainsHistory: unknown;
-  referringDomains: unknown;
+  matchingTerms: unknown;
+  relatedTerms: unknown;
+  searchSuggestions: unknown;
+  keywordOverview: unknown[];
+  scoredKeywords: KeywordExplorerKeyword[];
+};
+
+type KeywordExplorerEndpoint =
+  | "matching-terms"
+  | "related-terms"
+  | "search-suggestions"
+  | "overview";
+
+type KeywordExplorerKeyword = ExtractedKeyword & {
+  source: "Ahrefs Keywords Explorer";
+  sourceEndpoints: string[];
+  globalVolume?: number;
+  serpLastUpdate?: string;
+};
+
+type KeywordPoolItem = Omit<KeywordExplorerKeyword, "source" | "score"> & {
+  score?: number;
+};
+
+type AhrefsEndpointResult = {
+  endpoint: KeywordExplorerEndpoint;
+  url: string;
+  status: number;
+  data: unknown;
 };
 
 type GscPayload = {
@@ -38,7 +63,7 @@ function toNumber(value: unknown) {
   }
 
   if (typeof value === "string") {
-    const parsed = Number(value.replace(/,/g, ""));
+    const parsed = Number(value.replace(/[$,]/g, ""));
     return Number.isFinite(parsed) ? parsed : undefined;
   }
 
@@ -67,12 +92,239 @@ function findRows(value: unknown): unknown[] {
   return [];
 }
 
+function normalizeKeyword(keyword: string) {
+  return keyword.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function toStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return undefined;
+}
+
+function getKeywordRecord(row: unknown) {
+  const record = toRecord(row);
+
+  if (!record || typeof record.keyword !== "string" || !record.keyword.trim()) {
+    return null;
+  }
+
+  return record;
+}
+
+function getKeywordMetrics(record: Record<string, unknown>) {
+  return {
+    volume: toNumber(record.volume),
+    difficulty: toNumber(record.difficulty),
+    cpc: toNumber(record.cpc),
+    trafficPotential: toNumber(record.traffic_potential),
+    intents: toStringArray(record.intents),
+    globalVolume: toNumber(record.global_volume),
+    serpLastUpdate:
+      typeof record.serp_last_update === "string"
+        ? record.serp_last_update
+        : undefined,
+  };
+}
+
+function formatKeywordForLog(keyword: ExtractedKeyword | KeywordPoolItem) {
+  return withoutUndefined({
+    keyword: keyword.keyword,
+    source: "source" in keyword ? keyword.source : undefined,
+    sourceEndpoints:
+      "sourceEndpoints" in keyword ? keyword.sourceEndpoints : undefined,
+    volume: keyword.volume,
+    difficulty: keyword.difficulty,
+    cpc: keyword.cpc,
+    trafficPotential: keyword.trafficPotential,
+    intents: keyword.intents,
+    score: keyword.score,
+  });
+}
+
+function formatKeywordRowForLog(row: unknown) {
+  const record = getKeywordRecord(row);
+
+  if (!record) {
+    return row;
+  }
+
+  return withoutUndefined({
+    keyword: normalizeKeyword(record.keyword as string),
+    ...getKeywordMetrics(record),
+  });
+}
+
+function formatApiCallForLog(call: AhrefsEndpointResult) {
+  const rows = findRows(call.data);
+
+  return {
+    endpoint: call.endpoint,
+    method: "GET",
+    url: call.url,
+    curl: `curl -X GET "${call.url}" -H "Authorization: Bearer [REDACTED]" -H "Accept: application/json"`,
+    status: call.status,
+    rowCount: rows.length,
+    resultRows: rows.map(formatKeywordRowForLog),
+  };
+}
+
+export function appendKeywordWorkflowLog(entry: unknown) {
+  const logFile =
+    process.env.AHREFS_KEYWORD_LOG_FILE ||
+    path.join(process.cwd(), "ahrefs-keyword-flow.log");
+
+  try {
+    fs.appendFileSync(
+      logFile,
+      `${JSON.stringify(entry, null, 2)}\n\n`,
+      "utf8",
+    );
+  } catch (error) {
+    console.error("Failed to write Ahrefs keyword flow log", error);
+  }
+}
+
+function withoutUndefined<T extends Record<string, unknown>>(values: T) {
+  return Object.fromEntries(
+    Object.entries(values).filter(([, value]) => value !== undefined),
+  ) as Partial<T>;
+}
+
+function mergeKeywordRows(
+  keywordMap: Map<string, KeywordPoolItem>,
+  rows: unknown[],
+  sourceEndpoint: string,
+) {
+  rows.forEach((row) => {
+    const record = getKeywordRecord(row);
+
+    if (!record) {
+      return;
+    }
+
+    const keyword = normalizeKeyword(record.keyword as string);
+    const existing = keywordMap.get(keyword);
+    const metrics = getKeywordMetrics(record);
+
+    keywordMap.set(keyword, {
+      ...existing,
+      ...withoutUndefined(metrics),
+      keyword: existing?.keyword ?? keyword,
+      sourceEndpoints: Array.from(
+        new Set([...(existing?.sourceEndpoints ?? []), sourceEndpoint]),
+      ),
+    });
+  });
+}
+
+function scoreKeyword(keyword: Pick<
+  KeywordExplorerKeyword,
+  "trafficPotential" | "volume" | "cpc" | "difficulty"
+>) {
+  const trafficPotential = keyword.trafficPotential ?? 0;
+  const volume = keyword.volume ?? 0;
+  const cpc = keyword.cpc ?? 0;
+  const difficulty = keyword.difficulty ?? 0;
+
+  return Number(
+    (
+      trafficPotential * 0.5 +
+      volume * 0.3 +
+      cpc * 0.2 -
+      difficulty * 2
+    ).toFixed(2),
+  );
+}
+
+function rankKeywordPool(keywordMap: Map<string, KeywordPoolItem>) {
+  return Array.from(keywordMap.values()).sort((a, b) => {
+    const aScore = scoreKeyword(a);
+    const bScore = scoreKeyword(b);
+    return bScore - aScore;
+  });
+}
+
+function mergeOverviewMetrics(
+  keywordMap: Map<string, KeywordPoolItem>,
+  overviewResponses: unknown[],
+) {
+  overviewResponses.flatMap(findRows).forEach((row) => {
+    const record = getKeywordRecord(row);
+
+    if (!record) {
+      return;
+    }
+
+    const keyword = normalizeKeyword(record.keyword as string);
+    const existing = keywordMap.get(keyword);
+
+    if (!existing) {
+      return;
+    }
+
+    keywordMap.set(keyword, {
+      ...existing,
+      ...withoutUndefined(getKeywordMetrics(record)),
+    });
+  });
+}
+
+function toScoredKeywords(keywordMap: Map<string, KeywordPoolItem>) {
+  return Array.from(keywordMap.values())
+    .map((keyword) => ({
+      ...keyword,
+      source: "Ahrefs Keywords Explorer" as const,
+      score: scoreKeyword(keyword),
+    }))
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+}
+
+function chunk<T>(items: T[], size: number) {
+  const chunks: T[][] = [];
+
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+
+  return chunks;
+}
+
+function getOverviewKeywordLimit() {
+  const limit = Number(process.env.AHREFS_OVERVIEW_KEYWORD_LIMIT ?? "0");
+
+  if (!Number.isFinite(limit)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(100, Math.floor(limit)));
+}
+
+function getKeywordDiscoveryLimit() {
+  const limit = Number(process.env.AHREFS_KEYWORD_DISCOVERY_LIMIT ?? "4");
+
+  if (!Number.isFinite(limit)) {
+    return 4;
+  }
+
+  return Math.max(1, Math.min(100, Math.floor(limit)));
+}
+
 function addKeyword(
   keywordMap: Map<string, ExtractedKeyword>,
   keyword: string,
   values: ExtractedKeyword,
 ) {
-  const normalized = keyword.trim().toLowerCase();
+  const normalized = normalizeKeyword(keyword);
   const existing = keywordMap.get(normalized);
 
   keywordMap.set(normalized, {
@@ -109,93 +361,14 @@ export function extractSeoKeywords(
   seoData: SeoData,
   primaryKeyword: string,
 ): ExtractedKeyword[] {
-  const ahrefsKeywordMap = new Map<string, ExtractedKeyword>();
-  const gscKeywordMap = new Map<string, ExtractedKeyword>();
-
-  findRows(seoData.ahrefs.organicKeywords).forEach((row) => {
-    const record = toRecord(row);
-
-    if (!record || typeof record.keyword !== "string" || !record.keyword.trim()) {
-      return;
-    }
-
-    const keyword = record.keyword.trim();
-
-    addKeyword(ahrefsKeywordMap, keyword, {
-      keyword,
-      source: "Ahrefs",
-      volume: toNumber(record.volume),
-      traffic: toNumber(record.sum_traffic),
-      position: toNumber(record.best_position),
-    });
-  });
-
-  findRows(seoData.ahrefs.topPages).forEach((row) => {
-    const record = toRecord(row);
-
-    if (!record || typeof record.top_keyword !== "string") {
-      return;
-    }
-
-    const keyword = record.top_keyword.trim();
-
-    if (!keyword) {
-      return;
-    }
-
-    addKeyword(ahrefsKeywordMap, keyword, {
-      keyword,
-      source: "Ahrefs",
-      volume: toNumber(record.top_keyword_volume),
-      traffic: toNumber(record.sum_traffic),
-      position: toNumber(record.top_keyword_best_position),
-    });
-  });
-
-  seoData.googleSearchConsole.rows.forEach((row) => {
-    const record = toRecord(row);
-    if (!record) {
-      return;
-    }
-
-    const keys = record.keys;
-    const keyword = Array.isArray(keys) ? keys[0] : undefined;
-
-    if (typeof keyword !== "string" || !keyword.trim()) {
-      return;
-    }
-
-    const normalized = keyword.trim().toLowerCase();
-    const existing = ahrefsKeywordMap.get(normalized) ?? gscKeywordMap.get(normalized);
-
-    gscKeywordMap.set(normalized, {
-      ...existing,
-      keyword: existing?.keyword ?? keyword.trim(),
-      source: existing?.source ?? "Search Console",
-      clicks: toNumber(record.clicks),
-      impressions: toNumber(record.impressions),
-      position: toNumber(record.position),
-    });
-  });
-
   const keywordMap = new Map<string, ExtractedKeyword>();
-  const sortedAhrefs = Array.from(ahrefsKeywordMap.values()).sort((a, b) => {
-    const aScore = a.traffic ?? a.volume ?? 0;
-    const bScore = b.traffic ?? b.volume ?? 0;
-    return bScore - aScore;
-  });
-  const sortedGsc = Array.from(gscKeywordMap.values()).sort((a, b) => {
-    const aScore = a.clicks ?? a.impressions ?? 0;
-    const bScore = b.clicks ?? b.impressions ?? 0;
-    return bScore - aScore;
-  });
 
-  [...sortedAhrefs, ...sortedGsc].forEach((keyword) => {
+  seoData.ahrefs.scoredKeywords.slice(0, 20).forEach((keyword) => {
     addKeyword(keywordMap, keyword.keyword, keyword);
   });
 
   fallbackKeywordVariants(primaryKeyword).forEach((keyword) => {
-    if (keywordMap.size >= 10 || keywordMap.has(keyword.toLowerCase())) {
+    if (keywordMap.size >= 20 || keywordMap.has(keyword.toLowerCase())) {
       return;
     }
 
@@ -207,25 +380,17 @@ export function extractSeoKeywords(
 
   return Array.from(keywordMap.values())
     .sort((a, b) => {
-      const aScore = a.traffic ?? a.clicks ?? a.impressions ?? a.volume ?? 0;
-      const bScore = b.traffic ?? b.clicks ?? b.impressions ?? b.volume ?? 0;
+      const aScore = a.score ?? a.trafficPotential ?? a.volume ?? 0;
+      const bScore = b.score ?? b.trafficPotential ?? b.volume ?? 0;
       return bScore - aScore;
     })
-    .slice(0, 12);
+    .slice(0, 20);
 }
 
 function todayMinusDays(days: number) {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - days);
   return date.toISOString().slice(0, 10);
-}
-
-function cleanDomain(domain: string) {
-  return domain
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/^www\./i, "")
-    .replace(/\/.*$/, "");
 }
 
 function normalizePrivateKey(rawKey: string) {
@@ -269,21 +434,16 @@ function normalizePrivateKey(rawKey: string) {
 }
 
 async function fetchAhrefsEndpoint(
-  endpoint:
-    | "organic-keywords"
-    | "top-pages"
-    | "metrics"
-    | "refdomains-history"
-    | "refdomains",
+  endpoint: KeywordExplorerEndpoint,
   params: Record<string, string>,
-) {
+): Promise<AhrefsEndpointResult> {
   const apiKey = process.env.AHREFS_API_KEY;
 
   if (!apiKey) {
     throw new Error("Missing AHREFS_API_KEY.");
   }
 
-  const url = new URL(`https://api.ahrefs.com/v3/site-explorer/${endpoint}`);
+  const url = new URL(`https://api.ahrefs.com/v3/keywords-explorer/${endpoint}`);
 
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(key, value);
@@ -304,65 +464,155 @@ async function fetchAhrefsEndpoint(
       const parsed = JSON.parse(body);
       if (parsed.error) errorMessage = parsed.error;
     } catch {}
-    throw new Error(`Ahrefs ${endpoint} failed: ${response.status} ${errorMessage}`);
+    appendKeywordWorkflowLog({
+      event: "ahrefs_keyword_api_error",
+      timestamp: new Date().toISOString(),
+      endpoint,
+      url: url.toString(),
+      status: response.status,
+      responseBody: errorMessage,
+    });
+    throw new Error(
+      `Ahrefs Keywords Explorer ${endpoint} failed: ${response.status} ${errorMessage}`,
+    );
   }
 
-  return response.json();
+  return {
+    endpoint,
+    url: url.toString(),
+    status: response.status,
+    data: await response.json(),
+  };
 }
 
 export async function fetchAhrefsData(input: BlogRequest) {
-  const target = cleanDomain(input.websiteDomain);
-  const date = new Date().toISOString().slice(0, 10);
-  const dateFrom = todayMinusDays(93);
+  const keywordMap = new Map<string, KeywordPoolItem>();
+  const country = "us";
+  const discoveryLimit = getKeywordDiscoveryLimit();
   const baseParams = {
-    target,
-    date,
-    limit: "1000",
+    keywords: input.mainKeyword,
+    country,
+    limit: String(discoveryLimit),
+    select: "keyword,volume,difficulty,cpc,intents,traffic_potential",
   };
 
-  const [
-    organicKeywords,
-    topPages,
-    metrics,
-    referringDomainsHistory,
-    referringDomains,
-  ] = await Promise.all([
-    fetchAhrefsEndpoint("organic-keywords", {
-      ...baseParams,
-      select:
-        "keyword,best_position,best_position_url,volume,keyword_difficulty,sum_traffic,best_position_kind",
-      order_by: "sum_traffic:desc",
-    }),
-    fetchAhrefsEndpoint("top-pages", {
-      ...baseParams,
-      select:
-        "url,sum_traffic,keywords,top_keyword,top_keyword_volume,top_keyword_best_position,referring_domains,ur",
-      order_by: "sum_traffic:desc",
-    }),
-    fetchAhrefsEndpoint("metrics", {
-      target,
-      date,
-    }),
-    fetchAhrefsEndpoint("refdomains-history", {
-      target,
-      date_from: dateFrom,
-      date_to: date,
-    }),
-    fetchAhrefsEndpoint("refdomains", {
-      target,
-      date_from: dateFrom,
-      select: "domain,first_seen,new_links,lost_links,dofollow_links",
-      limit: "100",
-      order_by: "new_links:desc",
-    }),
-  ]);
+  const [matchingTermsCall, relatedTermsCall, searchSuggestionsCall] =
+    await Promise.all([
+      fetchAhrefsEndpoint("matching-terms", baseParams),
+      fetchAhrefsEndpoint("related-terms", baseParams),
+      fetchAhrefsEndpoint("search-suggestions", baseParams),
+    ]);
+
+  const matchingTerms = matchingTermsCall.data;
+  const relatedTerms = relatedTermsCall.data;
+  const searchSuggestions = searchSuggestionsCall.data;
+
+  mergeKeywordRows(keywordMap, findRows(matchingTerms), "matching-terms");
+  mergeKeywordRows(keywordMap, findRows(relatedTerms), "related-terms");
+  mergeKeywordRows(keywordMap, findRows(searchSuggestions), "search-suggestions");
+
+  const mergedKeywordPool = rankKeywordPool(keywordMap);
+  const overviewKeywordLimit = getOverviewKeywordLimit();
+
+  const overviewKeywords = mergedKeywordPool
+    .slice(0, overviewKeywordLimit)
+    .map((keyword) => keyword.keyword);
+  let keywordOverviewCalls: AhrefsEndpointResult[] = [];
+  let keywordOverviewError: string | undefined;
+
+  if (overviewKeywords.length > 0) {
+    try {
+      keywordOverviewCalls = await Promise.all(
+        chunk(overviewKeywords, 50).map((keywords) =>
+          fetchAhrefsEndpoint("overview", {
+            country,
+            keywords: keywords.join(","),
+            select:
+              "keyword,volume,difficulty,cpc,traffic_potential,intents,global_volume,serp_last_update",
+          }),
+        ),
+      );
+    } catch (error) {
+      keywordOverviewError =
+        error instanceof Error
+          ? error.message
+          : "Ahrefs Keywords Explorer overview failed.";
+    }
+  }
+
+  const keywordOverview = keywordOverviewCalls.map((call) => call.data);
+
+  mergeOverviewMetrics(keywordMap, keywordOverview);
+  const scoredKeywords = toScoredKeywords(keywordMap).slice(0, 20);
+
+  appendKeywordWorkflowLog({
+    event: "ahrefs_keyword_workflow",
+    timestamp: new Date().toISOString(),
+    seedKeyword: input.mainKeyword,
+    country,
+    configuredLimits: {
+      discoveryLimitPerEndpoint: discoveryLimit,
+      overviewKeywordLimit,
+    },
+    scoreFormula:
+      "score = (traffic_potential * 0.5) + (volume * 0.3) + (cpc * 0.2) - (difficulty * 2)",
+    step1MatchingTerms: {
+      description:
+        "Returns keywords that directly match or closely contain the seed keyword.",
+      apiCall: formatApiCallForLog(matchingTermsCall),
+    },
+    step2RelatedTerms: {
+      description:
+        "Returns semantically related topic-level keyword expansions.",
+      apiCall: formatApiCallForLog(relatedTermsCall),
+    },
+    step3SearchSuggestions: {
+      description:
+        "Returns real user search queries from Google autocomplete.",
+      apiCall: formatApiCallForLog(searchSuggestionsCall),
+    },
+    step4MergeKeywordPool: {
+      description:
+        "Combines matching terms, related terms, and search suggestions, then lowercases, trims, and deduplicates keywords.",
+      inputRowCounts: {
+        matchingTerms: findRows(matchingTerms).length,
+        relatedTerms: findRows(relatedTerms).length,
+        searchSuggestions: findRows(searchSuggestions).length,
+      },
+      uniqueKeywordCount: mergedKeywordPool.length,
+      masterKeywordPool: mergedKeywordPool.map(formatKeywordForLog),
+    },
+    step5KeywordOverview: {
+      description:
+        "Fetches deeper SEO metrics for the highest-quality keywords from the merged pool.",
+      overviewKeywordLimit,
+      status:
+        overviewKeywordLimit === 0
+          ? "skipped_disabled"
+          : keywordOverviewError
+            ? "failed_skipped"
+            : "completed",
+      error: keywordOverviewError,
+      selectedKeywordCount: overviewKeywords.length,
+      selectedKeywords: overviewKeywords,
+      apiCalls: keywordOverviewCalls.map(formatApiCallForLog),
+    },
+    step6KeywordScoringAndRanking: {
+      description:
+        "Ranks keywords by traffic potential, volume, CPC, and difficulty.",
+      top20PerformingKeywords: scoredKeywords.map(formatKeywordForLog),
+      top10KeywordsSentToBlog: scoredKeywords
+        .slice(0, 10)
+        .map(formatKeywordForLog),
+    },
+  });
 
   return {
-    organicKeywords,
-    topPages,
-    metrics,
-    referringDomainsHistory,
-    referringDomains,
+    matchingTerms,
+    relatedTerms,
+    searchSuggestions,
+    keywordOverview,
+    scoredKeywords,
   };
 }
 

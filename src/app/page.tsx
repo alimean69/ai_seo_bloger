@@ -103,10 +103,16 @@ export default function Home() {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data.error || "Unable to generate the blog.");
+        setError(data?.error || "Unable to generate the blog.");
+        return;
+      }
+
+      if (!data?.blog) {
+        setError("The blog response was empty. Please try again.");
+        return;
       }
 
       setBlog(data.blog);
@@ -123,11 +129,7 @@ export default function Home() {
         setFieldErrors(errors);
         setError("Please fix the highlighted fields.");
       } else {
-        setError(
-          caughtError instanceof Error
-            ? caughtError.message
-            : "Unable to generate the blog.",
-        );
+        setError("Network error. Please check the local server and try again.");
       }
     } finally {
       setIsGenerating(false);
@@ -154,11 +156,11 @@ export default function Home() {
           </div>
           <div className="max-w-3xl">
             <h1 className="text-3xl font-semibold tracking-normal text-slate-950 sm:text-4xl">
-              Generate an SEO blog from keyword, Ahrefs, and Search Console data.
+              Generate an SEO blog from your own keyword list.
             </h1>
             <p className="mt-3 text-base leading-7 text-slate-600">
-              Fill the form, generate once, and copy the finished blog package.
-              No auth, no database, no saved content.
+              Enter the keywords you want used, generate once, and copy the finished blog package.
+              No Ahrefs or Search Console keyword calls.
             </p>
           </div>
         </div>
@@ -169,7 +171,7 @@ export default function Home() {
           <CardHeader>
             <CardTitle>Blog inputs</CardTitle>
             <CardDescription>
-              These fields are sent to the API route for SEO data and AI writing.
+              These fields are sent to the API route for AI writing only.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -177,7 +179,7 @@ export default function Home() {
               <FieldError message={error} />
 
               <div className="space-y-2">
-                <Label htmlFor="websiteDomain">Website domain</Label>
+                <RequiredLabel htmlFor="websiteDomain">Website domain</RequiredLabel>
                 <Input
                   id="websiteDomain"
                   placeholder="nobltravel.com"
@@ -190,20 +192,23 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="mainKeyword">Main keyword</Label>
+                <RequiredLabel htmlFor="mainKeyword">Keywords</RequiredLabel>
                 <Input
                   id="mainKeyword"
-                  placeholder="luxury family travel"
+                  placeholder="best carry on luggage, lightweight luggage, luggage sets"
                   value={form.mainKeyword}
                   onChange={(event) =>
                     updateField("mainKeyword", event.target.value)
                   }
                 />
+                <p className="text-xs leading-5 text-slate-500">
+                  Enter at least one keyword. Separate multiple keywords with commas.
+                </p>
                 <FieldError message={fieldErrors.mainKeyword} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="targetAudience">Target audience</Label>
+                <RequiredLabel htmlFor="targetAudience">Target audience</RequiredLabel>
                 <Input
                   id="targetAudience"
                   placeholder="Parents planning premium vacations"
@@ -217,7 +222,7 @@ export default function Home() {
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="space-y-2">
-                  <Label>Blog tone</Label>
+                  <RequiredLabel>Blog tone</RequiredLabel>
                   <Select
                     value={form.blogTone}
                     onValueChange={(value) => updateField("blogTone", value)}
@@ -237,7 +242,7 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Blog length</Label>
+                  <RequiredLabel>Blog length</RequiredLabel>
                   <Select
                     value={form.blogLength}
                     onValueChange={(value) => updateField("blogLength", value)}
@@ -258,9 +263,9 @@ export default function Home() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="productServiceName">
+                <RequiredLabel htmlFor="productServiceName">
                   Product/service name
-                </Label>
+                </RequiredLabel>
                 <Input
                   id="productServiceName"
                   placeholder="Nobl Travel planning service"
@@ -322,7 +327,7 @@ export default function Home() {
             {!blog ? (
               <div className="flex min-h-[480px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-6 text-center text-sm leading-6 text-slate-500">
                 {isGenerating
-                  ? "Fetching SEO data and writing the blog..."
+                  ? "Writing the blog from your provided keywords..."
                   : "Generated keywords and final blog content will show here."}
               </div>
             ) : (
@@ -348,6 +353,20 @@ function FieldError({ message }: { message?: string }) {
   }
 
   return <p className="text-sm leading-5 text-red-600">{message}</p>;
+}
+
+function RequiredLabel({
+  children,
+  htmlFor,
+}: {
+  children: React.ReactNode;
+  htmlFor?: string;
+}) {
+  return (
+    <Label htmlFor={htmlFor}>
+      {children} <span className="text-red-600">*</span>
+    </Label>
+  );
 }
 
 function ResultBlock({
@@ -397,10 +416,10 @@ function ExtractedKeywords({ keywords }: { keywords: ExtractedKeyword[] }) {
     <section className="space-y-3 rounded-md border border-emerald-200 bg-emerald-50 p-4">
       <div>
         <h3 className="text-sm font-semibold text-emerald-950">
-          Extracted API keywords
+          Provided keywords
         </h3>
         <p className="mt-1 text-xs leading-5 text-emerald-800">
-          Pulled from Ahrefs and Search Console; suggested variants fill gaps if data is thin.
+          These are the manual keywords used in the blog prompt and highlighted in blue in the result.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -420,11 +439,17 @@ function ExtractedKeywords({ keywords }: { keywords: ExtractedKeyword[] }) {
 
 function formatKeywordMetrics(keyword: ExtractedKeyword) {
   const metrics = [
-    keyword.volume ? `Volume: ${keyword.volume}` : "",
-    keyword.traffic ? `Traffic: ${keyword.traffic}` : "",
-    keyword.clicks ? `Clicks: ${keyword.clicks}` : "",
-    keyword.impressions ? `Impressions: ${keyword.impressions}` : "",
-    keyword.position ? `Position: ${keyword.position.toFixed(1)}` : "",
+    keyword.volume !== undefined ? `Volume: ${keyword.volume}` : "",
+    keyword.difficulty !== undefined ? `Difficulty: ${keyword.difficulty}` : "",
+    keyword.cpc !== undefined ? `CPC: ${keyword.cpc}` : "",
+    keyword.trafficPotential !== undefined
+      ? `Traffic potential: ${keyword.trafficPotential}`
+      : "",
+    keyword.intents?.length ? `Intent: ${keyword.intents.join(", ")}` : "",
+    keyword.score !== undefined ? `Score: ${keyword.score}` : "",
+    keyword.selectedIntent ? `GPT intent: ${keyword.selectedIntent}` : "",
+    keyword.priority ? `Priority: ${keyword.priority}` : "",
+    keyword.reason ? `Reason: ${keyword.reason}` : "",
   ].filter(Boolean);
 
   return [keyword.source, ...metrics].join(" | ");

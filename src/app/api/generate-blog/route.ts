@@ -1,20 +1,76 @@
 import { NextResponse } from "next/server";
 
 import { generateSeoBlog } from "@/lib/openai-blog";
-import { blogRequestSchema } from "@/lib/seo-schema";
-import { extractSeoKeywords, fetchSeoData } from "@/lib/seo-providers";
+import { blogRequestSchema, type ExtractedKeyword } from "@/lib/seo-schema";
+import type { SeoData } from "@/lib/seo-providers";
 
 export const runtime = "nodejs";
+
+function parseProvidedKeywords(value: string): ExtractedKeyword[] {
+  const keywordMap = new Map<string, ExtractedKeyword>();
+
+  value
+    .split(/[\n,]+/)
+    .map((keyword) => keyword.trim())
+    .filter(Boolean)
+    .forEach((keyword) => {
+      const normalized = keyword.toLowerCase().replace(/\s+/g, " ");
+
+      if (!keywordMap.has(normalized)) {
+        keywordMap.set(normalized, {
+          keyword,
+          source: "User",
+        });
+      }
+    });
+
+  return Array.from(keywordMap.values()).slice(0, 10);
+}
+
+function buildManualSeoData(keywords: ExtractedKeyword[]): SeoData {
+  return {
+    ahrefs: {
+      matchingTerms: {
+        source: "manual_user_input",
+        keywords: keywords.map((keyword) => keyword.keyword),
+      },
+      relatedTerms: [],
+      searchSuggestions: [],
+      keywordOverview: [],
+      scoredKeywords: [],
+    },
+    googleSearchConsole: {
+      startDate: "",
+      endDate: "",
+      rows: [],
+      status: "skipped",
+      note: "External SEO keyword APIs are disabled. Keywords were provided manually by the user.",
+    },
+  };
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const input = blogRequestSchema.parse(body);
-    const seoData = await fetchSeoData(input);
-    const extractedKeywords = extractSeoKeywords(seoData, input.mainKeyword);
-    const blog = await generateSeoBlog(input, seoData, extractedKeywords);
+    const extractedKeywords = parseProvidedKeywords(input.mainKeyword);
 
-    return NextResponse.json({ blog, extractedKeywords });
+    if (extractedKeywords.length === 0) {
+      throw new Error("Enter at least one keyword.");
+    }
+
+    const blogInput = {
+      ...input,
+      mainKeyword: extractedKeywords[0]?.keyword ?? input.mainKeyword,
+    };
+
+    const seoData = buildManualSeoData(extractedKeywords);
+    const blog = await generateSeoBlog(blogInput, seoData, extractedKeywords);
+
+    return NextResponse.json({
+      blog,
+      extractedKeywords,
+    });
   } catch (error) {
     const message =
       error instanceof Error
