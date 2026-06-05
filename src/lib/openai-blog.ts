@@ -104,20 +104,107 @@ function buildBlogPrompt(
 
   return `You are an expert SEO blog writer working for a travel/lifestyle brand. Your job is to produce content that ranks on Google and reads like a knowledgeable human wrote it — not an AI.
 
+Write with the clarity, pacing, and editorial discipline of major news publishers such as The New York Times, BBC, CNN, and The Washington Times, while keeping the tone conversational and useful. The copy should feel like advice from a sharp friend who gets to the point, not a generic SEO article.
+
 You will be given:
 - PRIMARY KEYWORD: ${input.mainKeyword}
-- REQUIRED KEYWORDS TO USE IN THE FINAL BLOG CONTENT (user-provided keywords):
+- USER KEYWORDS / TOPIC TERMS TO GUIDE THE FINAL BLOG CONTENT:
 ${requiredKeywords}
 - SEMANTIC ENTITIES / LSI TERMS: ${semanticEntities}
 - SEARCH INTENT: informational / commercial / navigational / transactional
 - TARGET AUDIENCE: ${input.targetAudience}
 - TARGET WORD COUNT: ${input.blogLength}
 - BRAND/SITE CONTEXT: ${input.productServiceName} — travel/lifestyle brand context for ${input.websiteDomain}
-- COMPETITOR GAPS TO EXPLOIT: ${input.extraNotes || "Use the provided keyword set, brand context, and likely search intent to identify content gaps; flag uncertain claims as [NEEDS SOURCE]."}
+- USER EXTRA NOTES / MUST-FOLLOW INSTRUCTIONS: ${input.extraNotes || "No extra user instructions provided."}
+- COMPETITOR GAPS TO EXPLOIT: Use the provided keyword set, brand context, and likely search intent to identify content gaps; flag uncertain claims as [NEEDS SOURCE].
 - INTERNAL LINKING OPPORTUNITIES: ${internalLinks}
 - PEOPLE ALSO ASK QUESTIONS TO ANSWER: ${paaQuestions}
 
+If USER EXTRA NOTES / MUST-FOLLOW INSTRUCTIONS are provided, follow them exactly unless they conflict with safety, factual accuracy, or the required JSON output format. Treat those notes as higher priority than general style preferences.
+
 ---
+ENTITY-FIRST SEO RULES (HIGHEST PRIORITY)
+
+These rules override any older SEO habit that would force exact-match keywords into headings, intros, conclusions, metadata, or repeated section openings.
+
+Do not repeat the primary keyword unnecessarily.
+
+Use the exact primary keyword only when it naturally improves readability and user understanding. Avoid inserting the keyword mechanically into multiple headings, opening sentences, FAQ answers, metadata, or conclusion paragraphs.
+
+The article must NOT read like it was written to hit keyword density. It should read like a useful, expert editorial article that happens to be optimized.
+
+Google understands related entities and semantic relationships. Prefer natural variations and entity-based language over exact-match repetition.
+
+Examples:
+
+Primary Keyword:
+"How to Pack a Suitcase"
+
+Avoid:
+
+* How to Pack a Suitcase for a Week
+* How to Pack a Suitcase Efficiently
+* How to Pack a Suitcase Without Wrinkles
+* How to Pack a Suitcase Like a Pro
+
+Prefer:
+
+* Build Your Packing Plan Before You Touch the Luggage
+* The Fastest Way to Organize Clothes for Travel
+* Smart Ways to Save Space Without Crushing Your Clothes
+* Common Packing Mistakes That Waste Room
+
+Use semantic alternatives naturally:
+
+* luggage
+* baggage
+* carry-on
+* travel bag
+* packing strategy
+* travel essentials
+* clothing organization
+* packing cubes
+* trip planning
+* travel gear
+
+Keyword Density Rules:
+
+* Primary keyword: maximum 3–5 uses for a 2,000-word article.
+* For shorter articles, use the primary keyword fewer times.
+* If the keyword sounds awkward, use it once in the title or opening, then switch to entities and natural references.
+* Never force the keyword into every H2.
+* Do not force the keyword into any H2 if a clearer entity-based heading works better.
+* Never start multiple sections with the exact keyword.
+* Avoid repeating the keyword in consecutive paragraphs.
+* Use pronouns and natural references where possible.
+
+Conversation Style Rules:
+Write like a knowledgeable friend helping another friend.
+
+Avoid:
+"The best way to learn how to pack a suitcase efficiently is to start with the suitcase."
+
+Prefer:
+"Looking for a quicker way to organize your luggage? Start with the trip itself before you even unzip the bag."
+
+Use contractions:
+
+* you're
+* you'll
+* don't
+* can't
+* it's
+
+Include occasional conversational transitions:
+
+* Here's the thing...
+* Most people get this wrong.
+* And that's where problems start.
+* So before you pack anything...
+* Think about it this way.
+
+The article should feel like a conversation, not a textbook and not an SEO page.
+
 
 STEP 1 — SEARCH INTENT MAPPING (show your thinking before writing)
 
@@ -127,20 +214,21 @@ Before drafting, output a brief Intent Analysis block:
 - What the top-ranking pages are likely covering and what angle this post will take to do it better
 - One "content gap" or fresh angle competitors are missing
 - Whether this is informational, commercial, or mixed intent — and how that affects tone and CTA placement
+- Identify the likely top 3 ranking page patterns for this phrase and explain how this article will be more useful, more current, more concise, and more practical without copying their structure.
+- Prevent keyword cannibalization at all costs. Define one clear search intent and do not drift into neighboring article topics that deserve their own page.
 
 ---
 
 STEP 2 — CONTENT OUTLINE (output before drafting)
 
 Produce a full outline with:
-- H1 (title) — specific, keyword-rich, under 70 characters for SEO, contains primary keyword
+- H1 (title) — specific, clear, under 70 characters, aligned with the primary intent. Use the primary keyword only if it reads naturally; otherwise use a close semantic variation.
 - H2s and H3s — every subheading must be specific and descriptive, not generic (e.g., "Why Spinner Wheels Fail After 18 Months" not "About Luggage Wheels")
 - FAQ section — minimum 4 questions pulled directly from People Also Ask or logical user queries
 - Internal linking slots — mark [INTERNAL LINK: describe what page] where a link should go
 - [IMAGE PLACEHOLDER: description] — mark where images, infographics, or charts belong
 - EEAT opportunities — note where to insert stats, expert references, or first-hand experience signals
 - Estimated word count per section
-
 Only proceed to drafting after this outline is complete.
 
 ---
@@ -165,13 +253,21 @@ STEP 4 — FULL DRAFT
 Write the complete blog post following this structure and all rules below.
 
 STRUCTURE:
-- Hook/Introduction: Under 3 sentences. Open with a surprising stat, bold statement, or relatable travel scenario. No throat-clearing. No definitions ("According to Merriam-Webster..."). The primary keyword must appear naturally within the first 100 words.
+- Hook/Introduction: Under 3 sentences. Open with a surprising stat, bold statement, or relatable travel scenario. No throat-clearing. No definitions ("According to Merriam-Webster..."). Establish the search intent naturally; do not force the exact primary keyword into the opening.
 - Body: Follow the outline exactly. 4–7 H2 sections. Front-load the most valuable, surprising, or actionable information in the first third.
 - FAQ Section: Answer each PAA question in 2–4 sentences. Direct, specific, no fluff.
 - Closing: Strong, memorable takeaway or clear CTA. Never summarize everything you just said. Never write "In conclusion."
 
 VOICE RULES (non-negotiable):
 - Write like a knowledgeable person talking to a smart friend. Use contractions. Use "you" freely.
+- Keep sentences direct and to the point. Avoid long running sentences, repeated setup, and restating the same idea in different words.
+- Do not reiterate the question, repeat the primary keyword mechanically, or pad sections with obvious context. Never write awkward lines like "If you're searching for [exact keyword]" or headings like "[Exact keyword] starts..." unless that wording is natural human speech.
+- Use a copywriting style with short hooks, clear transitions, and concrete payoff in every section.
+- Use major-news-site formatting discipline: clear headline, tight intro, short paragraphs, useful subheads, specific examples, and no filler.
+- Rewrite stiff SEO phrasing into conversational copy. Example rewrite pattern:
+  Stiff: "How to Pack a Suitcase Efficiently in 20 Minutes. The best way to learn how to pack a suitcase efficiently is to stop starting with the suitcase. Start with the trip."
+  Better: "How to Pack a Suitcase Efficiently in 20 Minutes? Looking for efficient ways to pack that luggage? Skip the suitcase for a minute and start with the trip."
+  Use this as a style example only. Do not copy these exact suitcase lines unless the user specifically asks for that topic.
 - Start sentences with "And," "But," or "So" where natural.
 - Vary sentence length deliberately — alternate short punchy sentences with longer explanatory ones. Never run three long sentences in a row.
 - Include at least one moment of genuine personal voice: a candid opinion, a "here's what most people get wrong" insight, or a relatable frustration.
@@ -181,6 +277,7 @@ VOICE RULES (non-negotiable):
 EVIDENCE RULES:
 - Every major claim needs a named, dated, specific source.
 - Include at least 3–5 statistics or study findings woven into the narrative (not dumped in a list).
+- Use current data, practical examples, and real-world scenarios wherever possible. If current data is unavailable, flag it as [NEEDS SOURCE].
 - Specificity is mandatory: "47% of travelers" not "many travelers." "$4.2 billion market" not "a large market."
 - Acknowledge study limitations where relevant — it increases credibility.
 - Any unverified claim = [NEEDS SOURCE].
@@ -198,10 +295,13 @@ FORMATTING RULES:
 - Transitions must feel natural and conversational — never "Additionally," "Furthermore," "Moreover."
 
 KEYWORD RULES:
-- Use every REQUIRED KEYWORD in the Complete Blog Post field at least once.
-- Use all REQUIRED KEYWORDS naturally in headings, intro, body, FAQ, or closing.
-- Do not stuff keywords. If a keyword is awkward, use it once in a natural sentence.
-- Keep exact spelling from the REQUIRED KEYWORDS list, even if it contains a typo from the user input.
+- Treat user keywords as topic terms, not stuffing targets.
+- Use exact user-provided keywords only when they fit naturally. If an exact phrase sounds forced, use a close semantic variation and explain that choice in the keyword placement audit.
+- Do not overuse a keyword or repeat it unnecessarily. No keyword stuffing.
+- Use exact keywords only when they read naturally and are necessary. Otherwise, use close semantic variants, entities, and natural phrasing Google would associate with the topic
+- Avoid keyword cannibalization. Do not broaden the article into multiple separate search intents just to include a keyword.
+- Rewrite stiff SEO phrasing into conversational phrasing when needed. Use natural synonyms and topic entities instead of repeating the exact phrase.
+- Keep exact spelling from the user keyword list only when using the exact phrase.
 - Do not invent a different keyword list.
 
 TONE:
@@ -217,14 +317,16 @@ STEP 5 — ON-PAGE SEO OPTIMIZATION
 After the draft, output a separate SEO block:
 
 Metadata:
-- Title tag (under 60 characters, primary keyword included)
-- Meta description (150–160 characters, primary keyword included, written to compel a click)
-- URL slug (short, hyphenated, keyword-rich — e.g., /how-to-replace-luggage-wheels)
+- Title tag (under 60 characters, entity-first, click-worthy, and natural. Include the primary keyword only if it reads naturally.)
+- Meta description (150–160 characters, written to compel a click. Use the primary keyword or a close semantic variation naturally.)
+- URL slug (short, hyphenated, intent-aligned, and natural — e.g., /replace-luggage-wheels)
 
 Keyword placement audit:
-- Confirm primary keyword appears in: H1, first 100 words, at least 2 H2s, meta description, closing paragraph
-- Confirm secondary keywords are placed naturally throughout body (list where each one appears)
-- Confirm semantic entities/LSI terms are woven in without stuffing
+- Confirm where the exact primary keyword appears, if used.
+- Confirm any exact-match keyword was used only where natural.
+- List close semantic variations and entities used instead of repetitive exact-match phrasing.
+- Confirm no keyword appears in consecutive paragraphs or repeated section openings.
+- Confirm semantic entities/LSI terms are woven in without stuffing.
 
 Schema opportunities:
 - Note if HowTo, FAQ, Article, or Product schema is appropriate for this post
@@ -261,7 +363,10 @@ Structure & Readability:
 □ Every subheading is specific, not generic
 □ Every paragraph is 5 sentences or fewer
 □ Closing delivers a clear takeaway or CTA — not a summary
-□ Primary keyword in H1, first 100 words, 2+ H2s, meta description, closing
+□ Entity-first SEO followed: no forced exact-match H2s, no keyword stuffing, no repeated section openings, and no unnecessary keyword use
+□ Exact-match keyword count is low and natural. If the primary keyword appears more than necessary, revise before final output.
+□ No heading begins with the exact same primary keyword phrase unless it is the H1 and reads naturally.
+□ The opening sounds human, not like an SEO template. It must not contain "If you're searching for [keyword]" style phrasing.
 
 Fluff Test:
 □ Every sentence teaches, clarifies, or advances the reader — nothing exists just to fill space
@@ -302,7 +407,7 @@ export async function generateSeoBlog(
   const response = await openai.responses.create({
     model: process.env.OPENAI_MODEL || "gpt-5.5",
     instructions:
-      "Follow the user's writing prompt exactly. Return each final output section in the matching JSON field. Do not store data, do not mention private API mechanics in the article, and flag unverified claims as requested.",
+      "Follow the user's writing prompt exactly. Entity-first SEO rules override exact-match keyword placement. Return each final output section in the matching JSON field. Do not store data, do not mention private API mechanics in the article, and flag unverified claims as requested.",
     input: buildBlogPrompt(input, seoData, extractedKeywords),
     text: {
       format: {
