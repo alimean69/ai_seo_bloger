@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 
+import {
+  analyzeExistingContentImprovement,
+  buildExistingContentMatch,
+  findExistingContentMatch,
+} from "@/lib/existing-content";
 import { generateSeoBlog } from "@/lib/openai-blog";
 import { blogRequestSchema, type ExtractedKeyword } from "@/lib/seo-schema";
 import type { SeoData } from "@/lib/seo-providers";
+import { fetchShopifyNewsArticles } from "@/lib/shopify-content";
 
 export const runtime = "nodejs";
 
@@ -65,6 +71,30 @@ export async function POST(request: Request) {
     };
 
     const seoData = buildManualSeoData(extractedKeywords);
+
+    if (!input.forceGenerate) {
+      const articles = await fetchShopifyNewsArticles();
+      const match = findExistingContentMatch(blogInput.mainKeyword, articles, 90);
+
+      if (match) {
+        const analysis = await analyzeExistingContentImprovement(
+          blogInput.mainKeyword,
+          match.confidence,
+          match.article,
+        );
+
+        return NextResponse.json({
+          existingContentMatch: buildExistingContentMatch(
+            blogInput.mainKeyword,
+            match.confidence,
+            match.article,
+            analysis,
+          ),
+          extractedKeywords,
+        });
+      }
+    }
+
     const blog = await generateSeoBlog(blogInput, seoData, extractedKeywords);
 
     return NextResponse.json({

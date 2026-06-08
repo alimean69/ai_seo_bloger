@@ -29,7 +29,40 @@ import {
   type ExtractedKeyword,
 } from "@/lib/seo-schema";
 
-const initialForm: BlogRequest = {
+type BlogForm = Omit<BlogRequest, "forceGenerate">;
+
+type ExistingContentMatch = {
+  query: string;
+  confidence: number;
+  article: {
+    id: string;
+    title: string;
+    handle: string;
+    summary: string;
+    publishedAt: string | null;
+    authorName?: string;
+    imageUrl?: string;
+    tags: string[];
+    url: string;
+    bodyPreview: string;
+  };
+  analysis: {
+    matchedReason: string;
+    improvementSummary: string;
+    cannibalizationRisk: string;
+    improvements: Array<{
+      area: string;
+      articleExcerpt: string;
+      currentIssue: string;
+      whyItMatters: string;
+      recommendedChange: string;
+      suggestedCopy: string;
+      priority: "high" | "medium" | "low";
+    }>;
+  };
+};
+
+const initialForm: BlogForm = {
   websiteDomain: "",
   mainKeyword: "",
   targetAudience: "",
@@ -64,10 +97,12 @@ function formatBlogForCopy(blog: BlogResponse, keywords: ExtractedKeyword[]) {
 }
 
 export default function Home() {
-  const [form, setForm] = useState<BlogRequest>(initialForm);
+  const [form, setForm] = useState<BlogForm>(initialForm);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [blog, setBlog] = useState<BlogResponse | null>(null);
+  const [existingContentMatch, setExistingContentMatch] =
+    useState<ExistingContentMatch | null>(null);
   const [extractedKeywords, setExtractedKeywords] = useState<
     ExtractedKeyword[]
   >([]);
@@ -79,20 +114,20 @@ export default function Home() {
     [blog, extractedKeywords],
   );
 
-  function updateField(name: keyof BlogRequest, value: string) {
+  function updateField(name: keyof BlogForm, value: string) {
     setForm((current) => ({ ...current, [name]: value }));
     setFieldErrors((current) => ({ ...current, [name]: "" }));
   }
 
-  async function handleGenerate(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitGeneration(forceGenerate = false) {
     setError("");
     setBlog(null);
+    setExistingContentMatch(null);
     setExtractedKeywords([]);
     setCopied(false);
 
     try {
-      const payload = blogRequestSchema.parse(form);
+      const payload = blogRequestSchema.parse({ ...form, forceGenerate });
       setIsGenerating(true);
 
       const response = await fetch("/api/generate-blog", {
@@ -107,6 +142,12 @@ export default function Home() {
 
       if (!response.ok) {
         setError(data?.error || "Unable to generate the blog.");
+        return;
+      }
+
+      if (data?.existingContentMatch) {
+        setExistingContentMatch(data.existingContentMatch);
+        setExtractedKeywords(data.extractedKeywords ?? []);
         return;
       }
 
@@ -129,11 +170,16 @@ export default function Home() {
         setFieldErrors(errors);
         setError("Please fix the highlighted fields.");
       } else {
-        setError("Network error. Please check the local server and try again.");
+      setError("Network error. Please check the local server and try again.");
       }
     } finally {
       setIsGenerating(false);
     }
+  }
+
+  async function handleGenerate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitGeneration(false);
   }
 
   async function handleCopy() {
@@ -324,11 +370,17 @@ export default function Home() {
             </Button>
           </CardHeader>
           <CardContent>
-            {!blog ? (
+            {existingContentMatch ? (
+              <ExistingContentMatchResult
+                isGenerating={isGenerating}
+                match={existingContentMatch}
+                onGenerateAnyway={() => submitGeneration(true)}
+              />
+            ) : !blog ? (
               <div className="flex min-h-[480px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-6 text-center text-sm leading-6 text-slate-500">
                 {isGenerating
-                  ? "Writing the blog from your provided keywords..."
-                  : "Generated keywords and final blog content will show here."}
+                  ? "Checking existing Shopify content before writing..."
+                  : "Existing-content checks, generated keywords, and final blog content will show here."}
               </div>
             ) : (
               <article className="space-y-7">
@@ -353,6 +405,108 @@ function FieldError({ message }: { message?: string }) {
   }
 
   return <p className="text-sm leading-5 text-red-600">{message}</p>;
+}
+
+function ExistingContentMatchResult({
+  match,
+  isGenerating,
+  onGenerateAnyway,
+}: {
+  match: ExistingContentMatch;
+  isGenerating: boolean;
+  onGenerateAnyway: () => void;
+}) {
+  return (
+    <article className="space-y-5">
+      <section className="rounded-md border border-amber-200 bg-amber-50 p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+              Existing Shopify topic found
+            </p>
+            <h2 className="text-xl font-semibold text-slate-950">
+              {match.article.title}
+            </h2>
+            <p className="text-sm leading-6 text-slate-700">
+              Confidence: <strong>{match.confidence}%</strong> for {match.query}.
+              To avoid keyword cannibalization, improve this existing article unless you intentionally need a separate page.
+            </p>
+            <a
+              className="inline-flex text-sm font-semibold text-blue-700 underline-offset-4 hover:underline"
+              href={match.article.url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Open existing article
+            </a>
+          </div>
+          <Button
+            disabled={isGenerating}
+            onClick={onGenerateAnyway}
+            type="button"
+            variant="outline"
+          >
+            {isGenerating ? <Loader2 className="animate-spin" /> : <Sparkles />}
+            Generate new blog anyway
+          </Button>
+        </div>
+      </section>
+
+      <section className="rounded-md border border-slate-200 bg-white p-4">
+        <h3 className="text-base font-semibold text-slate-950">
+          Improvement summary
+        </h3>
+        <p className="mt-2 text-sm leading-6 text-slate-700">
+          {match.analysis.improvementSummary}
+        </p>
+        <p className="mt-3 rounded-md border border-red-100 bg-red-50 p-3 text-sm leading-6 text-red-800">
+          <strong>Cannibalization risk:</strong> {match.analysis.cannibalizationRisk}
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="text-base font-semibold text-slate-950">
+          Areas to improve
+        </h3>
+        {match.analysis.improvements.map((improvement, index) => (
+          <div
+            className="rounded-md border border-blue-100 bg-blue-50 p-4"
+            key={`${improvement.area}-${index}`}
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-blue-700 px-2 py-0.5 text-xs font-semibold uppercase text-white">
+                {improvement.priority}
+              </span>
+              <h4 className="text-sm font-semibold text-slate-950">
+                {improvement.area}
+              </h4>
+            </div>
+            <blockquote className="mt-3 border-l-4 border-blue-300 pl-3 text-sm italic leading-6 text-slate-700">
+              {improvement.articleExcerpt}
+            </blockquote>
+            <dl className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+              <div>
+                <dt className="font-semibold text-slate-950">Current issue</dt>
+                <dd>{improvement.currentIssue}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-950">Why it matters</dt>
+                <dd>{improvement.whyItMatters}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-950">Recommended change</dt>
+                <dd>{improvement.recommendedChange}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-slate-950">Suggested copy</dt>
+                <dd>{improvement.suggestedCopy}</dd>
+              </div>
+            </dl>
+          </div>
+        ))}
+      </section>
+    </article>
+  );
 }
 
 function RequiredLabel({

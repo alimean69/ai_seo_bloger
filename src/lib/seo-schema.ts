@@ -31,6 +31,7 @@ export const blogRequestSchema = z.object({
     .min(2, "Enter a product or service name.")
     .max(160, "Name is too long."),
   extraNotes: z.string().trim().max(1200, "Notes are too long.").optional(),
+  forceGenerate: z.boolean().optional(),
 });
 
 export const blogResponseSchema = z.object({
