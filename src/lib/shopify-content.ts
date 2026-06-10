@@ -20,6 +20,10 @@ type ShopifyBlogResponse = {
       edges?: Array<{
         node: {
           articles: {
+            pageInfo: {
+              hasNextPage: boolean;
+              endCursor?: string | null;
+            };
             edges: Array<{
               node: {
                 id: string;
@@ -40,6 +44,12 @@ type ShopifyBlogResponse = {
   };
   errors?: Array<{ message: string }>;
 };
+
+type ShopifyArticleEdge = NonNullable<
+  NonNullable<
+    NonNullable<ShopifyBlogResponse["data"]>["blogs"]
+  >["edges"]
+>[number]["node"]["articles"]["edges"][number];
 
 export function stripHtml(value: string) {
   return value
@@ -89,11 +99,15 @@ export async function fetchShopifyNewsArticles() {
     throw new Error("Missing NOBL_SHOPIFY_TOKEN for Shopify blog lookup.");
   }
 
-  const query = `{
+  const query = `query NewsArticles($after: String) {
     blogs(first: 5, query: "handle:news") {
       edges {
         node {
-          articles(first: 100) {
+          articles(first: 250, after: $after) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
             edges {
               node {
                 id
@@ -113,31 +127,45 @@ export async function fetchShopifyNewsArticles() {
     }
   }`;
 
-  const response = await fetch(
-    `https://${store}.myshopify.com/admin/api/${apiVersion}/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "X-Shopify-Access-Token": token,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ query }),
-      cache: "no-store",
-    },
-  );
-  const payload = (await response.json()) as ShopifyBlogResponse;
+  const articleEdges: ShopifyArticleEdge[] = [];
+  let after: string | null = null;
+  let hasNextPage = true;
 
-  if (!response.ok || payload.errors?.length) {
-    const message = payload.errors?.map((error) => error.message).join("; ");
-    throw new Error(
-      message || `Shopify blog lookup failed with status ${response.status}.`,
+  while (hasNextPage && articleEdges.length < 500) {
+    const response = await fetch(
+      `https://${store}.myshopify.com/admin/api/${apiVersion}/graphql.json`,
+      {
+        method: "POST",
+        headers: {
+          "X-Shopify-Access-Token": token,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ query, variables: { after } }),
+        cache: "no-store",
+      },
     );
+    const payload = (await response.json()) as ShopifyBlogResponse;
+
+    if (!response.ok || payload.errors?.length) {
+      const message = payload.errors?.map((error) => error.message).join("; ");
+      throw new Error(
+        message || `Shopify blog lookup failed with status ${response.status}.`,
+      );
+    }
+
+    const articles = payload.data?.blogs?.edges?.[0]?.node.articles;
+
+    if (!articles) {
+      break;
+    }
+
+    articleEdges.push(...articles.edges);
+    after = articles.pageInfo.endCursor ?? null;
+    hasNextPage = articles.pageInfo.hasNextPage && Boolean(after);
   }
 
-  const articleEdges = payload.data?.blogs?.edges?.[0]?.node.articles.edges ?? [];
-
-  return articleEdges.map(({ node }): ShopifyArticle => ({
+  return articleEdges.slice(0, 500).map(({ node }): ShopifyArticle => ({
     id: node.id,
     title: node.title,
     handle: node.handle,

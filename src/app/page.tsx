@@ -96,6 +96,10 @@ function formatBlogForCopy(blog: BlogResponse, keywords: ExtractedKeyword[]) {
   ].join("\n");
 }
 
+function wait(milliseconds: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
 export default function Home() {
   const [form, setForm] = useState<BlogForm>(initialForm);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -107,6 +111,8 @@ export default function Home() {
     ExtractedKeyword[]
   >([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState("Preparing request...");
   const [copied, setCopied] = useState(false);
 
   const copyText = useMemo(
@@ -120,15 +126,48 @@ export default function Home() {
   }
 
   async function submitGeneration(forceGenerate = false) {
+    let progressTimer: number | undefined;
+    let phaseTimer: number | undefined;
+
     setError("");
     setBlog(null);
     setExistingContentMatch(null);
     setExtractedKeywords([]);
     setCopied(false);
+    setProgress(8);
+    setProgressLabel(
+      forceGenerate
+        ? "Preparing the new blog draft..."
+        : "Checking Shopify for existing content...",
+    );
 
     try {
       const payload = blogRequestSchema.parse({ ...form, forceGenerate });
       setIsGenerating(true);
+      progressTimer = window.setInterval(() => {
+        setProgress((current) => {
+          if (current >= 88) {
+            return current;
+          }
+
+          if (current < 28) {
+            return current + 4;
+          }
+
+          if (current < 62) {
+            return current + 3;
+          }
+
+          return current + 1;
+        });
+      }, 850);
+      phaseTimer = window.setTimeout(() => {
+        setProgressLabel(
+          forceGenerate
+            ? "Writing and formatting the blog..."
+            : "Analyzing topic overlap and preparing recommendations...",
+        );
+      }, 2800);
 
       const response = await fetch("/api/generate-blog", {
         method: "POST",
@@ -141,21 +180,29 @@ export default function Home() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
+        setProgress(100);
         setError(data?.error || "Unable to generate the blog.");
         return;
       }
 
       if (data?.existingContentMatch) {
+        setProgress(100);
+        setProgressLabel("Complete. Showing the matching Shopify article...");
+        await wait(550);
         setExistingContentMatch(data.existingContentMatch);
         setExtractedKeywords(data.extractedKeywords ?? []);
         return;
       }
 
       if (!data?.blog) {
+        setProgress(100);
         setError("The blog response was empty. Please try again.");
         return;
       }
 
+      setProgress(100);
+      setProgressLabel("Complete. Showing the generated blog...");
+      await wait(550);
       setBlog(data.blog);
       setExtractedKeywords(data.extractedKeywords ?? []);
     } catch (caughtError) {
@@ -173,6 +220,12 @@ export default function Home() {
       setError("Network error. Please check the local server and try again.");
       }
     } finally {
+      if (progressTimer) {
+        window.clearInterval(progressTimer);
+      }
+      if (phaseTimer) {
+        window.clearTimeout(phaseTimer);
+      }
       setIsGenerating(false);
     }
   }
@@ -379,7 +432,7 @@ export default function Home() {
             ) : !blog ? (
               <div className="flex min-h-[480px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-6 text-center text-sm leading-6 text-slate-500">
                 {isGenerating
-                  ? "Checking existing Shopify content before writing..."
+                  ? <LoadingProgressCircle label={progressLabel} progress={progress} />
                   : "Existing-content checks, generated keywords, and final blog content will show here."}
               </div>
             ) : (
@@ -405,6 +458,48 @@ function FieldError({ message }: { message?: string }) {
   }
 
   return <p className="text-sm leading-5 text-red-600">{message}</p>;
+}
+
+function LoadingProgressCircle({
+  label,
+  progress,
+}: {
+  label: string;
+  progress: number;
+}) {
+  const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
+
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <div
+        aria-label={`${safeProgress}% complete`}
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={safeProgress}
+        className="relative grid size-32 place-items-center rounded-full shadow-[0_18px_50px_rgba(15,23,42,0.12)]"
+        role="progressbar"
+        style={{
+          background: `conic-gradient(#2563eb ${safeProgress * 3.6}deg, #dbeafe 0deg)`,
+        }}
+      >
+        <div className="absolute inset-3 rounded-full bg-white" />
+        <div className="relative flex size-24 flex-col items-center justify-center rounded-full bg-slate-950 text-white">
+          <span className="text-2xl font-semibold leading-none">
+            {safeProgress}%
+          </span>
+          <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-blue-100">
+            Working
+          </span>
+        </div>
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-slate-950">{label}</p>
+        <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+          Checking existing Shopify content first, then generating only when a strong match is not found.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function ExistingContentMatchResult({
@@ -439,6 +534,14 @@ function ExistingContentMatchResult({
             >
               Open existing article
             </a>
+            <a
+              className="block break-all rounded-md border border-amber-100 bg-white/70 p-2 text-xs font-semibold leading-5 text-blue-700 underline-offset-4 hover:underline"
+              href={match.article.url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {match.article.url}
+            </a>
           </div>
           <Button
             disabled={isGenerating}
@@ -468,6 +571,14 @@ function ExistingContentMatchResult({
         <h3 className="text-base font-semibold text-slate-950">
           Areas to improve
         </h3>
+        <a
+          className="inline-flex break-all rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold leading-5 text-blue-700 underline-offset-4 hover:underline"
+          href={match.article.url}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Existing article link: {match.article.url}
+        </a>
         {match.analysis.improvements.map((improvement, index) => (
           <div
             className="rounded-md border border-blue-100 bg-blue-50 p-4"
