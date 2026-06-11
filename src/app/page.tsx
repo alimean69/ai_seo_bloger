@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Clipboard, Loader2, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Clipboard, Loader2, Sparkles } from "lucide-react";
 import { ZodError } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   blogRequestSchema,
@@ -217,7 +210,7 @@ export default function Home() {
         setFieldErrors(errors);
         setError("Please fix the highlighted fields.");
       } else {
-      setError("Network error. Please check the local server and try again.");
+        setError("Network error. Please check the local server and try again.");
       }
     } finally {
       if (progressTimer) {
@@ -246,28 +239,37 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-            <Sparkles className="size-4" />
-            One-time SEO Blog Generator
+    <main
+      className="creative-shell relative min-h-screen overflow-hidden"
+      data-theme="light"
+    >
+      <div className="creative-orb creative-orb-one" />
+      <div className="creative-orb creative-orb-two" />
+      <section className="creative-hero relative backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-10 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <NoblLogo />
+              <div>
+                <p className="creative-brand-name">NOBL TRAVEL</p>
+                <div className="creative-badge mt-1 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold shadow-sm">
+                  <Sparkles className="size-3.5" />
+                  SEO Blog Generator
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="max-w-3xl">
-            <h1 className="text-3xl font-semibold tracking-normal text-slate-950 sm:text-4xl">
+          <div className="max-w-4xl">
+            <h1 className="creative-title text-3xl font-semibold tracking-tight sm:text-5xl">
               Generate an SEO blog from your own keyword list.
             </h1>
-            <p className="mt-3 text-base leading-7 text-slate-600">
-              Enter the keywords you want used, generate once, and copy the finished blog package.
-              No Ahrefs or Search Console keyword calls.
-            </p>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[420px_1fr] lg:px-8">
-        <Card>
-          <CardHeader>
+      <section className="relative mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[420px_1fr] lg:px-8">
+        <Card className="creative-card backdrop-blur-xl">
+          <CardHeader className="creative-card-header">
             <CardTitle>Blog inputs</CardTitle>
             <CardDescription>
               These fields are sent to the API route for AI writing only.
@@ -280,6 +282,7 @@ export default function Home() {
               <div className="space-y-2">
                 <RequiredLabel htmlFor="websiteDomain">Website domain</RequiredLabel>
                 <Input
+                  className="creative-control h-11 rounded-xl focus-visible:ring-blue-600"
                   id="websiteDomain"
                   placeholder="nobltravel.com"
                   value={form.websiteDomain}
@@ -293,6 +296,7 @@ export default function Home() {
               <div className="space-y-2">
                 <RequiredLabel htmlFor="mainKeyword">Keywords</RequiredLabel>
                 <Input
+                  className="creative-control h-11 rounded-xl focus-visible:ring-blue-600"
                   id="mainKeyword"
                   placeholder="best carry on luggage, lightweight luggage, luggage sets"
                   value={form.mainKeyword}
@@ -309,6 +313,7 @@ export default function Home() {
               <div className="space-y-2">
                 <RequiredLabel htmlFor="targetAudience">Target audience</RequiredLabel>
                 <Input
+                  className="creative-control h-11 rounded-xl focus-visible:ring-blue-600"
                   id="targetAudience"
                   placeholder="Parents planning premium vacations"
                   value={form.targetAudience}
@@ -322,41 +327,21 @@ export default function Home() {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="space-y-2">
                   <RequiredLabel>Blog tone</RequiredLabel>
-                  <Select
+                  <StyledDropdown
+                    options={toneOptions}
                     value={form.blogTone}
-                    onValueChange={(value) => updateField("blogTone", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose tone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {toneOptions.map((tone) => (
-                        <SelectItem key={tone} value={tone}>
-                          {tone}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(value) => updateField("blogTone", value)}
+                  />
                   <FieldError message={fieldErrors.blogTone} />
                 </div>
 
                 <div className="space-y-2">
                   <RequiredLabel>Blog length</RequiredLabel>
-                  <Select
+                  <StyledDropdown
+                    options={lengthOptions}
                     value={form.blogLength}
-                    onValueChange={(value) => updateField("blogLength", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose length" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {lengthOptions.map((length) => (
-                        <SelectItem key={length} value={length}>
-                          {length}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(value) => updateField("blogLength", value)}
+                  />
                   <FieldError message={fieldErrors.blogLength} />
                 </div>
               </div>
@@ -366,6 +351,7 @@ export default function Home() {
                   Product/service name
                 </RequiredLabel>
                 <Input
+                  className="creative-control h-11 rounded-xl focus-visible:ring-blue-600"
                   id="productServiceName"
                   placeholder="Nobl Travel planning service"
                   value={form.productServiceName}
@@ -379,6 +365,7 @@ export default function Home() {
               <div className="space-y-2">
                 <Label htmlFor="extraNotes">Extra notes</Label>
                 <Textarea
+                  className="creative-control min-h-28 rounded-xl focus-visible:ring-blue-600"
                   id="extraNotes"
                   placeholder="Mention destinations, offers, brand style, or must-include points."
                   value={form.extraNotes}
@@ -389,7 +376,7 @@ export default function Home() {
                 <FieldError message={fieldErrors.extraNotes} />
               </div>
 
-              <Button className="w-full" disabled={isGenerating} type="submit">
+              <Button className="creative-submit h-11 w-full rounded-xl shadow-lg" disabled={isGenerating} type="submit">
                 {isGenerating ? (
                   <Loader2 className="animate-spin" />
                 ) : (
@@ -403,8 +390,8 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        <Card className="min-h-[640px]">
-          <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <Card className="creative-card min-h-[640px] backdrop-blur-xl">
+          <CardHeader className="creative-card-header flex flex-row items-start justify-between gap-4">
             <div>
               <CardTitle>Generated result</CardTitle>
               <CardDescription>
@@ -430,7 +417,7 @@ export default function Home() {
                 onGenerateAnyway={() => submitGeneration(true)}
               />
             ) : !blog ? (
-              <div className="flex min-h-[480px] items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-6 text-center text-sm leading-6 text-slate-500">
+              <div className="creative-empty flex min-h-[480px] items-center justify-center rounded-2xl border border-dashed px-6 text-center text-sm leading-6">
                 {isGenerating
                   ? <LoadingProgressCircle label={progressLabel} progress={progress} />
                   : "Existing-content checks, generated keywords, and final blog content will show here."}
@@ -457,7 +444,91 @@ function FieldError({ message }: { message?: string }) {
     return null;
   }
 
-  return <p className="text-sm leading-5 text-red-600">{message}</p>;
+  return (
+    <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm leading-5 text-red-700">
+      {message}
+    </p>
+  );
+}
+
+function StyledDropdown({
+  options,
+  value,
+  onChange,
+}: {
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        aria-expanded={isOpen}
+        className="creative-dropdown-trigger creative-control flex h-12 w-full items-center justify-between rounded-2xl px-4 text-left text-sm font-medium shadow-sm outline-none transition focus:ring-2 focus:ring-blue-600"
+        onClick={() => setIsOpen((current) => !current)}
+        type="button"
+      >
+        <span>{value}</span>
+        <ChevronDown
+          className={`size-4 opacity-70 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isOpen ? (
+        <div className="creative-dropdown-menu mt-2 w-full overflow-hidden rounded-2xl border p-1 shadow-2xl">
+          {options.map((option) => {
+            const selected = option === value;
+
+            return (
+              <button
+                className={`creative-dropdown-option flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition ${
+                  selected ? "is-selected font-semibold" : "font-medium"
+                }`}
+                key={option}
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+                type="button"
+              >
+                <span className="grid size-4 place-items-center">
+                  {selected ? <Check className="size-4" /> : null}
+                </span>
+                <span>{option}</span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function NoblLogo() {
+  return (
+    <svg
+      aria-label="NOBL logo"
+      className="nobl-logo-svg"
+      role="img"
+      viewBox="0 0 566 247"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M0 0H493L566 123.5L493 247H0V0Z" fill="currentColor" />
+      <text
+        fill="white"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="115"
+        fontWeight="300"
+        letterSpacing="10"
+        x="74"
+        y="161"
+      >
+        NOBL
+      </text>
+    </svg>
+  );
 }
 
 function LoadingProgressCircle({
@@ -476,19 +547,23 @@ function LoadingProgressCircle({
         aria-valuemax={100}
         aria-valuemin={0}
         aria-valuenow={safeProgress}
-        className="relative grid size-32 place-items-center rounded-full shadow-[0_18px_50px_rgba(15,23,42,0.12)]"
+        className="creative-loader relative grid size-40 place-items-center rounded-full"
         role="progressbar"
         style={{
-          background: `conic-gradient(#2563eb ${safeProgress * 3.6}deg, #dbeafe 0deg)`,
+          background: `conic-gradient(#22c55e 0deg, #2563eb ${safeProgress * 3.6}deg, rgba(191,219,254,0.55) 0deg)`,
         }}
       >
-        <div className="absolute inset-3 rounded-full bg-white" />
-        <div className="relative flex size-24 flex-col items-center justify-center rounded-full bg-slate-950 text-white">
-          <span className="text-2xl font-semibold leading-none">
+        <span className="creative-loader-orbit" />
+        <span className="creative-loader-dot creative-loader-dot-one" />
+        <span className="creative-loader-dot creative-loader-dot-two" />
+        <span className="creative-loader-dot creative-loader-dot-three" />
+        <div className="creative-loader-inner absolute inset-4 rounded-full" />
+        <div className="creative-loader-core relative flex size-28 flex-col items-center justify-center rounded-full text-white">
+          <span className="text-3xl font-semibold leading-none">
             {safeProgress}%
           </span>
           <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-blue-100">
-            Working
+            Creating
           </span>
         </div>
       </div>
@@ -513,7 +588,7 @@ function ExistingContentMatchResult({
 }) {
   return (
     <article className="space-y-5">
-      <section className="rounded-md border border-amber-200 bg-amber-50 p-4">
+      <section className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
@@ -555,7 +630,7 @@ function ExistingContentMatchResult({
         </div>
       </section>
 
-      <section className="rounded-md border border-slate-200 bg-white p-4">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h3 className="text-base font-semibold text-slate-950">
           Improvement summary
         </h3>
@@ -572,7 +647,7 @@ function ExistingContentMatchResult({
           Areas to improve
         </h3>
         <a
-          className="inline-flex break-all rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold leading-5 text-blue-700 underline-offset-4 hover:underline"
+          className="inline-flex break-all rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold leading-5 text-blue-700 underline-offset-4 hover:underline"
           href={match.article.url}
           rel="noreferrer"
           target="_blank"
@@ -581,11 +656,11 @@ function ExistingContentMatchResult({
         </a>
         {match.analysis.improvements.map((improvement, index) => (
           <div
-            className="rounded-md border border-blue-100 bg-blue-50 p-4"
+            className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm"
             key={`${improvement.area}-${index}`}
           >
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-blue-700 px-2 py-0.5 text-xs font-semibold uppercase text-white">
+              <span className="rounded-full bg-blue-700 px-2.5 py-1 text-xs font-semibold uppercase text-white shadow-sm shadow-blue-700/20">
                 {improvement.priority}
               </span>
               <h4 className="text-sm font-semibold text-slate-950">
@@ -646,7 +721,7 @@ function ResultBlock({
   return (
     <section className="space-y-2">
       <h2 className="text-lg font-semibold">{title}</h2>
-      <div className="rounded-md border border-slate-200 bg-white p-4 text-sm leading-7 text-slate-700">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-7 text-slate-700 shadow-sm">
         <FormattedText content={content} keywords={keywords} />
       </div>
     </section>
@@ -657,10 +732,10 @@ function KeywordResult({ keywords }: { keywords: ExtractedKeyword[] }) {
   return (
     <section className="space-y-2">
       <h2 className="text-lg font-semibold">Keywords</h2>
-      <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-4">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
         {keywords.map((keyword) => (
           <span
-            className="rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700"
+            className="rounded-full border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm"
             key={`${keyword.source}-${keyword.keyword}`}
             title={formatKeywordMetrics(keyword)}
           >
@@ -678,7 +753,7 @@ function ExtractedKeywords({ keywords }: { keywords: ExtractedKeyword[] }) {
   }
 
   return (
-    <section className="space-y-3 rounded-md border border-emerald-200 bg-emerald-50 p-4">
+    <section className="space-y-3 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm">
       <div>
         <h3 className="text-sm font-semibold text-emerald-950">
           Provided keywords
@@ -690,7 +765,7 @@ function ExtractedKeywords({ keywords }: { keywords: ExtractedKeyword[] }) {
       <div className="flex flex-wrap gap-2">
         {keywords.map((keyword) => (
           <span
-            className="rounded-md border border-emerald-200 bg-white px-2.5 py-1 text-xs font-medium text-emerald-950"
+            className="rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-950 shadow-sm"
             key={`${keyword.source}-${keyword.keyword}`}
             title={formatKeywordMetrics(keyword)}
           >
@@ -749,8 +824,8 @@ function FormattedText({
           <p
             className={
               formattedLine.isHeading
-                ? "mt-3 whitespace-pre-wrap font-semibold text-slate-950 first:mt-0"
-                : "whitespace-pre-wrap"
+                ? "mt-5 whitespace-pre-wrap text-base font-semibold text-slate-950 first:mt-0"
+                : "whitespace-pre-wrap text-[15px] leading-7"
             }
             key={index}
           >
@@ -776,12 +851,15 @@ function HighlightedText({
     return text;
   }
 
-  const pattern = new RegExp(`(${keywords.map(escapeRegExp).join("|")})`, "gi");
+  const pattern = new RegExp(
+    `(${keywords.map(keywordToFlexiblePattern).join("|")})`,
+    "gi",
+  );
   const parts = text.split(pattern);
 
   return parts.map((part, index) => {
-    const isKeyword = keywords.some(
-      (keyword) => keyword.toLowerCase() === part.toLowerCase(),
+    const isKeyword = keywords.some((keyword) =>
+      new RegExp(`^${keywordToFlexiblePattern(keyword)}$`, "i").test(part),
     );
 
     if (!isKeyword) {
@@ -789,11 +867,24 @@ function HighlightedText({
     }
 
     return (
-      <span className="font-semibold text-blue-700" key={index}>
+      <span
+        className="keyword-highlight rounded-md bg-blue-100 px-1.5 py-0.5 font-semibold text-blue-800 ring-1 ring-blue-200"
+        key={index}
+      >
         {part}
       </span>
     );
   });
+}
+
+function keywordToFlexiblePattern(value: string) {
+  const words = value
+    .trim()
+    .split(/[\s\u00a0\-–—]+/)
+    .filter(Boolean)
+    .map(escapeRegExp);
+
+  return words.join("[\\s\\u00a0\\-–—]+");
 }
 
 function escapeRegExp(value: string) {

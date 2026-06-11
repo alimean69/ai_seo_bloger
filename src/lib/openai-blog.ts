@@ -146,9 +146,9 @@ CURRENT DATA AND SERP RESEARCH RULES (HIGHEST PRIORITY)
 
 Use ${currentYear} data whenever data, airline rules, baggage policies, prices, statistics, market numbers, travel costs, or survey claims are mentioned.
 
-For this run, ${currentYear} is the current year. Do not present 2025, 2024, or older statistics as current. A phrase like "a 2025 survey found" is not acceptable for a current-data claim in a ${currentYear} article unless the sentence clearly frames it as historical context and no current claim depends on it.
+For this run, ${currentYear} is the current year. Prefer ${currentYear} sources. If ${currentYear} data is not available, you may use the latest available 2025 source only if it is clearly labeled as 2025 or "latest available" data. Do not mislabel 2025 data as ${currentYear} data.
 
-If no ${currentYear} source is available for a statistic, either omit the statistic or write [NEEDS ${currentYear} SOURCE]. Do not substitute 2025 data and make it sound current.
+If no ${currentYear} source is available for a statistic, either use clearly labeled latest-available 2025 data, omit the statistic, or write [NEEDS CURRENT SOURCE]. Do not substitute 2025 data and make it sound like ${currentYear} data.
 
 Before drafting, identify the top 3 ranking page patterns for the primary topic and make this article better than them by being more direct, more current, more useful, and more concise.
 
@@ -158,11 +158,11 @@ When web search is available, use it to check:
 - ${currentYear} airline/baggage/travel policies
 - whether a company, airline, product, or rule has changed recently
 
-Never rely on outdated airline or baggage information. If a fact may have changed, verify it with a ${currentYear} source or flag it as [NEEDS ${currentYear} SOURCE].
+Never rely on outdated airline or baggage information. If a fact may have changed, verify it with a ${currentYear} source or flag it as [NEEDS CURRENT SOURCE].
 
-Do not mention outdated company status, airline policies, prices, baggage statistics, travel costs, family travel survey results, or travel rules unless explicitly discussing historical context. If unsure, write [NEEDS ${currentYear} SOURCE] rather than guessing.
+Do not mention outdated company status, airline policies, prices, baggage statistics, travel costs, family travel survey results, or travel rules unless explicitly discussing historical context or using clearly labeled latest-available data. If unsure, write [NEEDS CURRENT SOURCE] rather than guessing.
 
-For every statistic, include the source name and year. Prefer ${currentYear} sources. If the latest available source is older, do not use it as a current claim; say [NEEDS ${currentYear} SOURCE] instead.
+For every statistic, include the source name and year. Prefer ${currentYear} sources. If the latest available source is 2025, label it as 2025 or "latest available" data.
 
 ---
 USCREEN-STYLE FORMATTING RULES
@@ -302,7 +302,7 @@ For each H2 section, identify:
 
 Rules:
 - Never fabricate statistics, journal names, or citations. Ever.
-- Use ${currentYear} sources for statistics, travel costs, airline policies, baggage rules, and survey claims. If a ${currentYear} source cannot be confirmed, mark the claim [NEEDS ${currentYear} SOURCE] instead of using older data.
+- Use ${currentYear} sources for statistics, travel costs, airline policies, baggage rules, and survey claims. If a ${currentYear} source cannot be confirmed, use clearly labeled latest-available 2025 data or mark the claim [NEEDS CURRENT SOURCE].
 - Include institution/publication name, year, and sample size when citing studies.
 - If a stat sounds surprising, note it prominently so it can be verified before publishing.
 
@@ -337,10 +337,10 @@ VOICE RULES (non-negotiable):
 
 EVIDENCE RULES:
 - Every major claim needs a named, dated, specific source.
-- Include 3–5 statistics or study findings only when they can be supported by ${currentYear} or clearly current official sources. If not, use practical examples and mark data gaps [NEEDS ${currentYear} SOURCE].
-- Use ${currentYear} data, practical examples, and real-world scenarios wherever possible. If ${currentYear} data is unavailable, flag it as [NEEDS ${currentYear} SOURCE].
-- Do not use outdated statistics when ${currentYear} data is required. Avoid stale 2025, 2024, or 2023 baggage/travel data unless explicitly framed as historical context.
-- Check airline, baggage, and travel-policy claims against ${currentYear} sources. If uncertain, write [NEEDS ${currentYear} SOURCE].
+- Include 3–5 statistics or study findings only when they can be supported by ${currentYear}, clearly current official sources, or clearly labeled latest-available 2025 sources. If not, use practical examples and mark data gaps [NEEDS CURRENT SOURCE].
+- Use ${currentYear} data, practical examples, and real-world scenarios wherever possible. If ${currentYear} data is unavailable, label 2025 data honestly as latest available or flag it as [NEEDS CURRENT SOURCE].
+- Do not use outdated statistics when ${currentYear} data is required. Avoid stale 2024 or 2023 baggage/travel data unless explicitly framed as historical context.
+- Check airline, baggage, and travel-policy claims against ${currentYear} sources. If uncertain, write [NEEDS CURRENT SOURCE].
 - Specificity is mandatory: "47% of travelers" not "many travelers." "$4.2 billion market" not "a large market."
 - Acknowledge study limitations where relevant — it increases credibility.
 - Any unverified claim = [NEEDS SOURCE].
@@ -415,8 +415,8 @@ Evidence & Accuracy:
 □ Every major claim has a named, dated source or is flagged [NEEDS SOURCE]
 □ All statistics are specific (exact percentages, dollar amounts, sample sizes)
 □ No fabricated citations, journal names, or statistics
-□ Statistics, survey claims, travel costs, airline rules, baggage policies, and prices use ${currentYear} sources or are flagged [NEEDS ${currentYear} SOURCE]
-□ No 2025, 2024, or older statistic is presented as current ${currentYear} data
+□ Statistics, survey claims, travel costs, airline rules, baggage policies, and prices use ${currentYear} sources, clearly labeled latest-available 2025 sources, or are flagged [NEEDS CURRENT SOURCE]
+□ No 2025, 2024, or older statistic is mislabeled as ${currentYear} data
 
 Voice & Human Tone:
 □ First two sentences would sound natural spoken aloud
